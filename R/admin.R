@@ -24,11 +24,7 @@ ds.jobs.admin.list <- function(conns, admin_key, label = NULL) {
 #' @export
 ds.jobs.admin.cancel <- function(conns, job_id, admin_key) {
   key_enc <- .ds_encode(list(.admin_key = admin_key))
-  for (srv in names(conns)) {
-    tryCatch(
-      DSI::datashield.assign.expr(conns[srv], symbol = job_id,
-        expr = call("jobAdminCancelDS", job_id, key_enc)),
-      error = function(e) NULL)
-  }
-  invisible(NULL)
+  results <- .ds_safe_aggregate(conns,
+    expr = call("jobAdminCancelDS", job_id, key_enc))
+  dsjobs_result(per_site = results)
 }
