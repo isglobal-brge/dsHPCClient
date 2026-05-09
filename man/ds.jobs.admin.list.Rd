@@ -9,7 +9,8 @@ ds.jobs.admin.list(conns, admin_key, label = NULL)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{admin_key}{Character; the admin key matching the server config.}
+\item{admin_key}{Character; the admin key matching \code{dsjobs.admin_key} or
+\code{DSJOBS_ADMIN_KEY} on the server.}
 
 \item{label}{Character or NULL; filter by label.}
 }

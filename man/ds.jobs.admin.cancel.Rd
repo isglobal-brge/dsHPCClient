@@ -11,7 +11,8 @@ ds.jobs.admin.cancel(conns, job_id, admin_key)
 
 \item{job_id}{Character; job ID to cancel.}
 
-\item{admin_key}{Character; the admin key.}
+\item{admin_key}{Character; the admin key matching \code{dsjobs.admin_key} or
+\code{DSJOBS_ADMIN_KEY} on the server.}
 }
 \description{
 Cancel any job (admin only)
