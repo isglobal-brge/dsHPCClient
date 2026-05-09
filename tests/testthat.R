@@ -1,4 +1,4 @@
 library(testthat)
-library(dsJobsClient)
+library(dsHPCClient)
 
-test_check("dsJobsClient")
+test_check("dsHPCClient")

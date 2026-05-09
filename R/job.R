@@ -1,24 +1,35 @@
 # Module: Job Constructor
 
+#' Create a dsHPC job specification
+#'
+#' @param steps List of `dshpc_step` objects created with `ds_step_*()`.
+#' @param label Optional job label used for filtering and domain ownership.
+#' @param tags Optional character vector of operational tags.
+#' @param visibility Character visibility marker, usually `"private"` or
+#'   `"global"`.
+#' @param publish Optional publish metadata consumed by server packages.
+#' @param resource_class Optional coarse resource class.
+#' @param ... Additional server-side job specification fields.
+#' @return A `dshpc_job` object.
 #' @export
 ds_job <- function(steps, label = NULL, tags = NULL, visibility = "private",
                    publish = NULL, resource_class = NULL, ...) {
   if (!is.list(steps) || length(steps) == 0)
     stop("A job must contain at least one step.", call. = FALSE)
   for (i in seq_along(steps))
-    if (!inherits(steps[[i]], "dsjobs_step"))
-      stop("Step ", i, " is not a dsjobs_step object.", call. = FALSE)
+    if (!inherits(steps[[i]], "dshpc_step"))
+      stop("Step ", i, " is not a dshpc_step object.", call. = FALSE)
   steps_plain <- lapply(steps, function(s) { l <- as.list(s); class(l) <- NULL; l })
   job <- list(steps = steps_plain, label = label, tags = tags,
               visibility = visibility, publish = publish,
               resource_class = resource_class %||% "default", ...)
-  class(job) <- c("dsjobs_job", "list")
+  class(job) <- c("dshpc_job", "list")
   job
 }
 
 #' @export
-print.dsjobs_job <- function(x, ...) {
-  cat("dsjobs_job\n")
+print.dshpc_job <- function(x, ...) {
+  cat("dshpc_job\n")
   if (!is.null(x$label)) cat("  Label:", x$label, "\n")
   if (!is.null(x$tags)) cat("  Tags:", paste(x$tags, collapse = ", "), "\n")
   if (!identical(x$visibility, "private")) cat("  Visibility:", x$visibility, "\n")

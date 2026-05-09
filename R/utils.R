@@ -6,7 +6,7 @@
 }
 
 #' @keywords internal
-.generate_symbol <- function(prefix = "dsJ") {
+.generate_symbol <- function(prefix = "dsH") {
   paste0(prefix, ".",
          paste(sample(c(letters, LETTERS, 0:9), 6, replace = TRUE), collapse = ""))
 }

@@ -1,4 +1,4 @@
-Package: dsJobsClient
+Package: dsHPCClient
 Type: Package
 Title: DataSHIELD Client for Durable Federated Job Runtime
 Version: 0.1.0

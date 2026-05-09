@@ -1,7 +1,14 @@
 # Module: Blocking Wait
 
+#' Wait for a dsHPC job to reach a terminal state
+#'
+#' @param conns DSI connections object.
+#' @param job_id Character job id.
+#' @param timeout Numeric timeout in seconds.
+#' @param poll_interval Numeric polling interval in seconds.
+#' @return A `dshpc_result` status object from `ds.hpc.status()`.
 #' @export
-ds.jobs.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
+ds.hpc.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
   deadline <- Sys.time() + timeout
   srv_names <- names(conns)
   done <- stats::setNames(rep(FALSE, length(srv_names)), srv_names)
@@ -13,7 +20,7 @@ ds.jobs.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
     for (srv in srv_names[!done]) {
       st <- tryCatch({
         r <- DSI::datashield.aggregate(conns[srv],
-          expr = call("jobStatusDS", job_id))
+          expr = call("hpcStatusDS", job_id))
         r[[srv]]
       }, error = function(e) NULL)
 
@@ -30,5 +37,5 @@ ds.jobs.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
     Sys.sleep(poll_interval)
   }
   if (!all(done)) warning("Timeout on: ", paste(srv_names[!done], collapse=", "), call.=FALSE)
-  ds.jobs.status(conns, job_id)
+  ds.hpc.status(conns, job_id)
 }

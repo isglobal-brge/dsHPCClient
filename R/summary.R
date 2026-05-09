@@ -5,8 +5,8 @@
 #' @param conns DSI connections object.
 #' @param label Character or NULL; filter by label.
 #' @export
-ds.jobs.summary <- function(conns, label = NULL) {
-  jl <- ds.jobs.list(conns, label = label)
+ds.hpc.summary <- function(conns, label = NULL) {
+  jl <- ds.hpc.list(conns, label = label)
 
   for (srv in names(jl$per_site)) {
     df <- jl$per_site[[srv]]

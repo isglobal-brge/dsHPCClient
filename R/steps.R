@@ -52,12 +52,12 @@ ds_step_safe_summary <- function() {
 #' @keywords internal
 .make_step <- function(type, plane = "session", ...) {
   step <- list(type = type, plane = plane, ...)
-  class(step) <- c("dsjobs_step", "list")
+  class(step) <- c("dshpc_step", "list")
   step
 }
 #' @export
-print.dsjobs_step <- function(x, ...) {
-  cat("dsjobs_step\n  Type:", x$type, "\n  Plane:", x$plane, "\n")
+print.dshpc_step <- function(x, ...) {
+  cat("dshpc_step\n  Type:", x$type, "\n  Plane:", x$plane, "\n")
   if (!is.null(x$runner)) cat("  Runner:", x$runner, "\n")
   invisible(x)
 }

@@ -1,24 +1,40 @@
 # Module: Job Outputs
 
+#' List outputs registered for a dsHPC job
+#'
+#' @param conns DSI connections object.
+#' @param job_id Character job id.
+#' @return A `dshpc_result` with one output metadata data.frame per site.
 #' @export
-ds.jobs.outputs <- function(conns, job_id) {
+ds.hpc.outputs <- function(conns, job_id) {
   results <- .ds_safe_aggregate(conns,
-    expr = call("jobOutputsDS", job_id))
-  dsjobs_result(per_site = results)
+    expr = call("hpcOutputsDS", job_id))
+  dshpc_result(per_site = results)
 }
 
+#' Load a completed job output into the server session
+#'
+#' @param conns DSI connections object.
+#' @param job_id Character job id.
+#' @param output_name Character output name registered by the job.
+#' @param symbol Character server-side symbol to assign.
+#' @return Invisibly `NULL`.
 #' @export
-ds.jobs.load_output <- function(conns, job_id, output_name,
+ds.hpc.load_output <- function(conns, job_id, output_name,
                                  symbol = output_name) {
   DSI::datashield.assign.expr(conns, symbol = symbol,
-    expr = call("jobLoadOutputDS", job_id, output_name))
+    expr = call("hpcLoadOutputDS", job_id, output_name))
   invisible(NULL)
 }
 
+#' Report dsHPC server capabilities
+#'
+#' @param conns DSI connections object.
+#' @return A `dshpc_result` with per-site capability lists.
 #' @export
-ds.jobs.capabilities <- function(conns) {
-  results <- .ds_safe_aggregate(conns, expr = call("jobCapabilitiesDS"))
-  dsjobs_result(per_site = results)
+ds.hpc.capabilities <- function(conns) {
+  results <- .ds_safe_aggregate(conns, expr = call("hpcCapabilitiesDS"))
+  dshpc_result(per_site = results)
 }
 
 #' Get scheduler status
@@ -28,16 +44,22 @@ ds.jobs.capabilities <- function(conns) {
 #' available.
 #'
 #' @param conns DSI connections object.
-#' @return A dsjobs_result with per-site scheduler status lists.
+#' @return A dshpc_result with per-site scheduler status lists.
 #' @export
-ds.jobs.scheduler_status <- function(conns) {
-  results <- .ds_safe_aggregate(conns, expr = call("jobSchedulerStatusDS"))
-  dsjobs_result(per_site = results)
+ds.hpc.scheduler_status <- function(conns) {
+  results <- .ds_safe_aggregate(conns, expr = call("hpcSchedulerStatusDS"))
+  dshpc_result(per_site = results)
 }
 
+#' Tail sanitized dsHPC job logs
+#'
+#' @param conns DSI connections object.
+#' @param job_id Character job id.
+#' @param last_n Integer number of log lines requested from each site.
+#' @return A `dshpc_result` with per-site character vectors.
 #' @export
-ds.jobs.logs <- function(conns, job_id, last_n = 50L) {
+ds.hpc.logs <- function(conns, job_id, last_n = 50L) {
   results <- .ds_safe_aggregate(conns,
-    expr = call("jobLogsDS", job_id, as.integer(last_n)))
-  dsjobs_result(per_site = results)
+    expr = call("hpcLogsDS", job_id, as.integer(last_n)))
+  dshpc_result(per_site = results)
 }

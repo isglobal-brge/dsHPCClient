@@ -1,33 +1,33 @@
 # Module: Admin Functions
-# Disabled by default. Enabled when dsjobs.admin_key is set on the server or
-# DSJOBS_ADMIN_KEY is set in the Rock/HPC environment.
+# Disabled by default. Enabled when dshpc.admin_key is set on the server or
+# DSHPC_ADMIN_KEY is set in the Rock/HPC environment.
 # Key is B64-encoded for transport (Opal's R parser can't handle special chars).
 
 #' List ALL jobs from ALL users (admin only)
 #'
 #' @param conns DSI connections object.
-#' @param admin_key Character; the admin key matching `dsjobs.admin_key` or
-#'   `DSJOBS_ADMIN_KEY` on the server.
+#' @param admin_key Character; the admin key matching `dshpc.admin_key` or
+#'   `DSHPC_ADMIN_KEY` on the server.
 #' @param label Character or NULL; filter by label.
-#' @return A dsjobs_result with per-site data.frames.
+#' @return A dshpc_result with per-site data.frames.
 #' @export
-ds.jobs.admin.list <- function(conns, admin_key, label = NULL) {
+ds.hpc.admin.list <- function(conns, admin_key, label = NULL) {
   key_enc <- .ds_encode(list(.admin_key = admin_key))
   results <- .ds_safe_aggregate(conns,
-    expr = call("jobAdminListDS", key_enc, label))
-  dsjobs_result(per_site = results)
+    expr = call("hpcAdminListDS", key_enc, label))
+  dshpc_result(per_site = results)
 }
 
 #' Cancel any job (admin only)
 #'
 #' @param conns DSI connections object.
 #' @param job_id Character; job ID to cancel.
-#' @param admin_key Character; the admin key matching `dsjobs.admin_key` or
-#'   `DSJOBS_ADMIN_KEY` on the server.
+#' @param admin_key Character; the admin key matching `dshpc.admin_key` or
+#'   `DSHPC_ADMIN_KEY` on the server.
 #' @export
-ds.jobs.admin.cancel <- function(conns, job_id, admin_key) {
+ds.hpc.admin.cancel <- function(conns, job_id, admin_key) {
   key_enc <- .ds_encode(list(.admin_key = admin_key))
   results <- .ds_safe_aggregate(conns,
-    expr = call("jobAdminCancelDS", job_id, key_enc))
-  dsjobs_result(per_site = results)
+    expr = call("hpcAdminCancelDS", job_id, key_enc))
+  dshpc_result(per_site = results)
 }

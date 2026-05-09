@@ -4,12 +4,12 @@
 #' Submit a job to all nodes
 #'
 #' @param conns DSI connections object.
-#' @param job A dsjobs_job object.
-#' @return A dsjobs_submission with job_id and per-server details.
+#' @param job A dshpc_job object.
+#' @return A dshpc_submission with job_id and per-server details.
 #' @export
-ds.jobs.submit <- function(conns, job) {
-  if (!inherits(job, "dsjobs_job"))
-    stop("'job' must be a dsjobs_job object.", call. = FALSE)
+ds.hpc.submit <- function(conns, job) {
+  if (!inherits(job, "dshpc_job"))
+    stop("'job' must be a dshpc_job object.", call. = FALSE)
 
   job_id <- .generate_job_id()
 
@@ -23,7 +23,7 @@ ds.jobs.submit <- function(conns, job) {
 
     spec_enc <- .ds_encode(spec)
     DSI::datashield.assign.expr(conns[srv], symbol = job_id,
-      expr = call("jobSubmitDS", spec_enc))
+      expr = call("hpcSubmitDS", spec_enc))
 
     submissions[[srv]] <- list(method = backend$type, username = backend$username)
   }
@@ -32,13 +32,13 @@ ds.jobs.submit <- function(conns, job) {
     label = job$label, visibility = job$visibility,
     servers = names(conns), submissions = submissions,
     submitted_at = Sys.time())
-  class(result) <- c("dsjobs_submission", "list")
+  class(result) <- c("dshpc_submission", "list")
   result
 }
 
 #' @export
-print.dsjobs_submission <- function(x, ...) {
-  cat("dsjobs_submission\n")
+print.dshpc_submission <- function(x, ...) {
+  cat("dshpc_submission\n")
   cat("  Job ID:", x$job_id, "\n")
   if (!is.null(x$label)) cat("  Label:", x$label, "\n")
   cat("  Submitted:", format(x$submitted_at, "%Y-%m-%d %H:%M:%S"), "\n")
