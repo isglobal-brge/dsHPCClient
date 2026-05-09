@@ -6,8 +6,8 @@ S3method(print,dsjobs_job)
 S3method(print,dsjobs_result)
 S3method(print,dsjobs_step)
 S3method(print,dsjobs_submission)
-# Admin functions -- not in researcher namespace
-# Access via dsJobsClient:::ds.jobs.admin.list() if needed
+export(ds.jobs.admin.cancel)
+export(ds.jobs.admin.list)
 export(ds.jobs.capabilities)
 export(ds.jobs.list)
 export(ds.jobs.load_output)
@@ -31,5 +31,3 @@ export(ds_step_resolve_dataset)
 export(ds_step_run_artifact)
 export(ds_step_safe_summary)
 export(ds_step_stage_tabular)
-# Internal utilities -- not exported to researcher namespace
-# .ds_encode and .ds_safe_aggregate are used by dsRadiomicsClient/dsFlowerClient
