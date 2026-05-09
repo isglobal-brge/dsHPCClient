@@ -21,6 +21,20 @@ ds.jobs.capabilities <- function(conns) {
   dsjobs_result(per_site = results)
 }
 
+#' Get scheduler status
+#'
+#' Reports backend-agnostic scheduler state for each connected server, including
+#' cell/worker health, detected node budget, active usage, and GPU inventory when
+#' available.
+#'
+#' @param conns DSI connections object.
+#' @return A dsjobs_result with per-site scheduler status lists.
+#' @export
+ds.jobs.scheduler_status <- function(conns) {
+  results <- .ds_safe_aggregate(conns, expr = call("jobSchedulerStatusDS"))
+  dsjobs_result(per_site = results)
+}
+
 #' @export
 ds.jobs.logs <- function(conns, job_id, last_n = 50L) {
   results <- .ds_safe_aggregate(conns,

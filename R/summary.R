@@ -25,9 +25,8 @@ ds.jobs.summary <- function(conns, label = NULL) {
 
     # List each job
     for (i in seq_len(nrow(df))) {
-      vis <- if (identical(df$visibility[i], "global")) "[GLOBAL]" else "[private]"
       lab <- if (!is.na(df$label[i])) paste0(" <", df$label[i], ">") else ""
-      cat("  ", df$state[i], " ", vis, lab, "\n", sep = "")
+      cat("  ", df$state[i], lab, "\n", sep = "")
       cat("    ID: ", df$job_id[i], "\n")
       cat("    Progress: ", df$progress[i],
           "  Submitted: ", df$submitted_at[i], "\n\n")
