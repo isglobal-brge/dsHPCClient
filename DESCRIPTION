@@ -5,6 +5,9 @@ Version: 0.1.0
 Authors@R: c(
     person("David", "Sarrat González", role = c("aut", "cre"), email = "david.sarrat@isglobal.org"),
     person("Juan R", "González", role = "aut", email = "juanr.gonzalez@isglobal.org"))
+Author: David Sarrat González [aut, cre],
+    Juan R González [aut]
+Maintainer: David Sarrat González <david.sarrat@isglobal.org>
 Description: Client-side DataSHIELD package for composing and orchestrating
     durable federated jobs. Backend-agnostic control plane with adapters
     for Opal (via opalr) and Armadillo (via MolgenisArmadillo). Provides
@@ -18,7 +21,6 @@ Imports:
     uuid,
     stats,
     DSI,
-    digest,
     jsonlite
 Suggests:
     opalr,
