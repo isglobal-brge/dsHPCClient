@@ -47,3 +47,18 @@ test_that("job print works", {
   expect_output(print(job), "dshpc_job")
   expect_output(print(job), "Steps: 2")
 })
+
+test_that("ds_job accepts DAG pipelines", {
+  pipeline <- ds_pipeline(list(
+    ds_pipeline_node("resolve", ds_step_resolve_dataset("study.v1")),
+    ds_pipeline_node("extract", ds_step_run_artifact("dummy_runner"),
+      inputs = "resolve"),
+    ds_pipeline_node("summary", ds_step_safe_summary(), inputs = "extract")
+  ))
+
+  job <- ds_job(pipeline = pipeline, label = "dag-demo")
+  expect_s3_class(job, "dshpc_job")
+  expect_equal(length(job$dag$nodes), 3L)
+  expect_null(job$steps)
+  expect_output(print(job), "DAG nodes: 3")
+})

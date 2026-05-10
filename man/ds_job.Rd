@@ -5,12 +5,14 @@
 \title{Create a dsHPC job specification}
 \usage{
 ds_job(
-  steps,
+  steps = NULL,
   label = NULL,
   tags = NULL,
   visibility = "private",
   publish = NULL,
   resource_class = NULL,
+  pipeline = NULL,
+  dag = NULL,
   ...
 )
 }
@@ -27,6 +29,10 @@ ds_job(
 \item{publish}{Optional publish metadata consumed by server packages.}
 
 \item{resource_class}{Optional coarse resource class.}
+
+\item{pipeline}{Optional DAG pipeline created with \code{ds_pipeline()}.}
+
+\item{dag}{Optional raw DAG list for advanced users.}
 
 \item{...}{Additional server-side job specification fields.}
 }
