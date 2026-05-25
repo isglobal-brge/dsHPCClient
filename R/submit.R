@@ -29,7 +29,7 @@ ds.hpc.submit <- function(conns, job) {
   }
 
   result <- list(job_id = job_id,
-    label = job$label, visibility = job$visibility,
+    name = job$name, label = job$label, visibility = job$visibility,
     servers = names(conns), submissions = submissions,
     submitted_at = Sys.time())
   class(result) <- c("dshpc_submission", "list")
@@ -40,6 +40,7 @@ ds.hpc.submit <- function(conns, job) {
 print.dshpc_submission <- function(x, ...) {
   cat("dshpc_submission\n")
   cat("  Job ID:", x$job_id, "\n")
+  if (!is.null(x$name)) cat("  Name:", x$name, "\n")
   if (!is.null(x$label)) cat("  Label:", x$label, "\n")
   cat("  Submitted:", format(x$submitted_at, "%Y-%m-%d %H:%M:%S"), "\n")
   for (srv in names(x$submissions)) {

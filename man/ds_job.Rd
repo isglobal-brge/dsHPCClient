@@ -6,6 +6,7 @@
 \usage{
 ds_job(
   steps = NULL,
+  name = NULL,
   label = NULL,
   tags = NULL,
   visibility = "private",
@@ -18,6 +19,8 @@ ds_job(
 }
 \arguments{
 \item{steps}{List of \code{dshpc_step} objects created with \verb{ds_step_*()}.}
+
+\item{name}{Optional human-readable job name for client-side displays.}
 
 \item{label}{Optional job label used for filtering and domain ownership.}
 

@@ -41,7 +41,7 @@
 #' @keywords internal
 .empty_job_list <- function() {
   data.frame(job_id = character(0), state = character(0),
-    label = character(0), visibility = character(0),
+    name = character(0), label = character(0), visibility = character(0),
     owner_id = character(0), submitted_at = character(0),
     progress = character(0), stringsAsFactors = FALSE)
 }

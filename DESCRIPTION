@@ -23,6 +23,7 @@ Imports:
     DSI,
     jsonlite
 Suggests:
+    shiny,
     opalr,
     DSOpal,
     MolgenisArmadillo,

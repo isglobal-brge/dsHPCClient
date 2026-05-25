@@ -5,6 +5,7 @@
 #' @param steps List of `dshpc_step` objects created with `ds_step_*()`.
 #' @param pipeline Optional DAG pipeline created with `ds_pipeline()`.
 #' @param dag Optional raw DAG list for advanced users.
+#' @param name Optional human-readable job name for client-side displays.
 #' @param label Optional job label used for filtering and domain ownership.
 #' @param tags Optional character vector of operational tags.
 #' @param visibility Character visibility marker, usually `"private"` or
@@ -14,7 +15,7 @@
 #' @param ... Additional server-side job specification fields.
 #' @return A `dshpc_job` object.
 #' @export
-ds_job <- function(steps = NULL, label = NULL, tags = NULL,
+ds_job <- function(steps = NULL, name = NULL, label = NULL, tags = NULL,
                    visibility = "private", publish = NULL,
                    resource_class = NULL, pipeline = NULL, dag = NULL, ...) {
   if (!is.null(pipeline) && !is.null(dag))
@@ -23,7 +24,7 @@ ds_job <- function(steps = NULL, label = NULL, tags = NULL,
   if (!is.null(dag)) {
     dag <- as.list(dag)
     class(dag) <- NULL
-    job <- list(dag = dag, label = label, tags = tags,
+    job <- list(dag = dag, name = name, label = label, tags = tags,
                 visibility = visibility, publish = publish,
                 resource_class = resource_class %||% "default", ...)
     class(job) <- c("dshpc_job", "list")
@@ -36,7 +37,7 @@ ds_job <- function(steps = NULL, label = NULL, tags = NULL,
     if (!inherits(steps[[i]], "dshpc_step"))
       stop("Step ", i, " is not a dshpc_step object.", call. = FALSE)
   steps_plain <- lapply(steps, function(s) { l <- as.list(s); class(l) <- NULL; l })
-  job <- list(steps = steps_plain, label = label, tags = tags,
+  job <- list(steps = steps_plain, name = name, label = label, tags = tags,
               visibility = visibility, publish = publish,
               resource_class = resource_class %||% "default", ...)
   class(job) <- c("dshpc_job", "list")
@@ -46,6 +47,7 @@ ds_job <- function(steps = NULL, label = NULL, tags = NULL,
 #' @export
 print.dshpc_job <- function(x, ...) {
   cat("dshpc_job\n")
+  if (!is.null(x$name)) cat("  Name:", x$name, "\n")
   if (!is.null(x$label)) cat("  Label:", x$label, "\n")
   if (!is.null(x$tags)) cat("  Tags:", paste(x$tags, collapse = ", "), "\n")
   if (!identical(x$visibility, "private")) cat("  Visibility:", x$visibility, "\n")
