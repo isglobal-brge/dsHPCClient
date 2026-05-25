@@ -103,6 +103,10 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
   x$server <- server
   x$fetched_at <- fetched_at
   x$jobs <- .studio_df(x$jobs, .studio_empty_jobs())
+  if (nrow(x$jobs) > 0 && "submitted_at" %in% names(x$jobs)) {
+    x$jobs <- x$jobs[order(x$jobs$submitted_at, decreasing = TRUE,
+      na.last = TRUE), , drop = FALSE]
+  }
   x$steps <- .studio_df(x$steps, .studio_empty_steps())
   x$dag_nodes <- .studio_df(x$dag_nodes, .studio_empty_dag_nodes())
   x$dag_edges <- .studio_df(x$dag_edges, .studio_empty_dag_edges())
@@ -198,18 +202,20 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
                 "Mine" = "mine", "Global" = "global"),
               selected = "mine+global", width = "160px"),
             shiny::textInput("label", "Label", value = "", width = "180px"),
-            shiny::actionButton("refresh", "Refresh", class = "btn-primary"),
-            shiny::actionButton("cancel_job", "Cancel job",
-              class = "btn-danger"))),
+            shiny::actionButton("refresh", "Refresh", class = "btn-primary"))),
         shiny::uiOutput("status_bar"),
         shiny::uiOutput("summary_tiles"),
         shiny::div(class = "studio-grid",
           shiny::div(class = "studio-pane jobs-pane",
             shiny::div(class = "pane-head",
               shiny::tags$h2("Jobs"),
-              shiny::selectInput("job", "Job", choices = character(0),
-                width = "100%")),
-            shiny::tableOutput("jobs_table")),
+              shiny::selectInput("state_filter", "State",
+                choices = c("All" = "ALL", "Running" = "RUNNING",
+                  "Pending" = "PENDING", "Finished" = "FINISHED",
+                  "Published" = "PUBLISHED", "Failed" = "FAILED",
+                  "Cancelled" = "CANCELLED"),
+                selected = "ALL", width = "180px")),
+            shiny::uiOutput("job_list")),
           shiny::div(class = "studio-pane detail-pane",
             shiny::tabsetPanel(id = "tabs",
               shiny::tabPanel("Overview", shiny::uiOutput("job_detail")),
@@ -226,6 +232,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
     ),
     server = function(input, output, session) {
       snapshot <- shiny::reactiveVal(NULL)
+      selected_job_value <- shiny::reactiveVal(NULL)
       cancel_result <- shiny::reactiveVal(NULL)
 
       fetch <- function() {
@@ -239,28 +246,34 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
         ignoreInit = FALSE)
       shiny::observeEvent(input$refresh, fetch(), ignoreInit = TRUE)
 
-      shiny::observe({
+      filtered_jobs <- shiny::reactive({
         snap <- snapshot()
-        if (is.null(snap) || !isTRUE(snap$ok) || nrow(snap$jobs) == 0) {
-          shiny::updateSelectInput(session, "job", choices = character(0))
+        if (is.null(snap) || !isTRUE(snap$ok)) return(.studio_empty_jobs())
+        .studio_filter_jobs_by_state(snap$jobs, input$state_filter %||% "ALL")
+      })
+
+      shiny::observe({
+        jobs <- filtered_jobs()
+        if (nrow(jobs) == 0) {
+          selected_job_value(NULL)
           return()
         }
-        choices <- stats::setNames(snap$jobs$job_id,
-          paste0(snap$jobs$job_id, "  [", snap$jobs$state, "]"))
-        selected <- shiny::isolate(input$job)
-        if (is.null(selected) || !selected %in% unname(choices)) {
-          selected <- unname(choices)[1]
+        selected <- shiny::isolate(selected_job_value())
+        if (is.null(selected) || !selected %in% jobs$job_id) {
+          selected_job_value(jobs$job_id[1])
         }
-        shiny::updateSelectInput(session, "job", choices = choices,
-          selected = selected)
+      })
+
+      shiny::observeEvent(input$selected_job_click, {
+        selected_job_value(input$selected_job_click)
       })
 
       selected_job <- shiny::reactive({
-        snap <- snapshot()
-        if (is.null(snap) || nrow(snap$jobs) == 0) return(NULL)
-        job_id <- input$job %||% snap$jobs$job_id[1]
-        row <- snap$jobs[snap$jobs$job_id == job_id, , drop = FALSE]
-        if (nrow(row) == 0) snap$jobs[1, , drop = FALSE] else row
+        jobs <- filtered_jobs()
+        if (nrow(jobs) == 0) return(NULL)
+        job_id <- selected_job_value() %||% jobs$job_id[1]
+        row <- jobs[jobs$job_id == job_id, , drop = FALSE]
+        if (nrow(row) == 0) jobs[1, , drop = FALSE] else row
       })
 
       selected_job_id <- shiny::reactive({
@@ -280,7 +293,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
         shiny::div(class = "status-line ok",
           shiny::tags$strong(snap$server), " | ",
           "Last refresh: ", format(snap$fetched_at, "%H:%M:%S"), " | ",
-          "Server time: ", snap$server_time %||% "unknown")
+          "Server time: ", .studio_display_time(snap$server_time))
       })
 
       output$summary_tiles <- shiny::renderUI({
@@ -298,12 +311,9 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
               (states[["CANCELLED"]] %||% 0L), "red"))
       })
 
-      output$jobs_table <- shiny::renderTable({
-        snap <- snapshot()
-        if (is.null(snap) || !isTRUE(snap$ok)) return(data.frame())
-        .studio_jobs_table(snap$jobs)
-      }, striped = TRUE, bordered = FALSE, spacing = "s",
-      rownames = FALSE)
+      output$job_list <- shiny::renderUI({
+        .studio_job_list(filtered_jobs(), active_id = selected_job_id())
+      })
 
       output$job_detail <- shiny::renderUI({
         snap <- snapshot()
@@ -431,6 +441,71 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
 }
 
 #' @keywords internal
+.studio_filter_jobs_by_state <- function(jobs, state_filter = "ALL") {
+  if (!is.data.frame(jobs) || nrow(jobs) == 0) return(.studio_empty_jobs())
+  state_filter <- state_filter %||% "ALL"
+  if (!identical(state_filter, "ALL")) {
+    jobs <- jobs[toupper(jobs$state) == state_filter, , drop = FALSE]
+  }
+  jobs
+}
+
+#' @keywords internal
+.studio_job_list <- function(jobs, active_id = NULL) {
+  if (!is.data.frame(jobs) || nrow(jobs) == 0) {
+    return(shiny::div(class = "empty-state", "No jobs"))
+  }
+  shiny::div(class = "job-list",
+    lapply(seq_len(nrow(jobs)), function(i) {
+      .studio_job_card(jobs[i, , drop = FALSE],
+        active = identical(jobs$job_id[i], active_id))
+    }))
+}
+
+#' @keywords internal
+.studio_job_card <- function(row, active = FALSE) {
+  state <- toupper(row$state[1])
+  tone <- .studio_state_tone(state)
+  job_id <- row$job_id[1]
+  progress <- suppressWarnings(as.numeric(row$progress_percent[1]))
+  if (!is.finite(progress)) progress <- 0
+  onclick <- paste0("Shiny.setInputValue('selected_job_click', '",
+    .studio_html_escape(job_id), "', {priority: 'event'})")
+  shiny::tags$button(type = "button",
+    class = paste("job-card", tone, if (active) "active" else ""),
+    onclick = onclick,
+    shiny::div(class = "job-card-main",
+      shiny::span(class = paste("state-pill", tolower(state)), state),
+      shiny::tags$strong(row$name[1])),
+    shiny::div(class = "job-card-meta",
+      shiny::span(row$job_id[1]),
+      shiny::span(row$scope[1]),
+      shiny::span(row$label[1])),
+    shiny::div(class = "job-card-metrics",
+      shiny::span(paste("Progress", row$progress[1])),
+      shiny::span(paste("Elapsed",
+        .studio_format_duration(row$elapsed_seconds[1]))),
+      shiny::span(.studio_short_time(row$submitted_at[1]))),
+    shiny::div(class = "job-progress-track",
+      shiny::div(class = "job-progress-fill",
+        style = paste0("width:", max(0, min(100, progress)), "%"))))
+}
+
+#' @keywords internal
+.studio_state_tone <- function(state) {
+  switch(toupper(as.character(state %||% "")[1]),
+    RUNNING = "running", PENDING = "pending", FINISHED = "finished",
+    PUBLISHED = "published", FAILED = "failed", CANCELLED = "cancelled",
+    DONE = "finished", "neutral")
+}
+
+#' @keywords internal
+.studio_state_terminal <- function(state) {
+  toupper(as.character(state %||% "")[1]) %in%
+    c("FINISHED", "PUBLISHED", "FAILED", "CANCELLED")
+}
+
+#' @keywords internal
 .studio_jobs_table <- function(jobs) {
   if (!is.data.frame(jobs) || nrow(jobs) == 0) return(data.frame())
   data.frame(
@@ -483,8 +558,15 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
   status_class <- paste0("state-pill ", tolower(row$state[1]))
   shiny::div(class = "detail-wrap",
     shiny::div(class = "detail-title",
-      shiny::tags$h2(row$job_id[1]),
-      shiny::span(class = status_class, row$state[1])),
+      shiny::div(
+        shiny::tags$h2(row$name[1]),
+        shiny::tags$span(class = "detail-subtitle", row$job_id[1])),
+      shiny::div(class = "detail-actions",
+        shiny::span(class = status_class, row$state[1]),
+        if (!.studio_state_terminal(row$state[1])) {
+          shiny::actionButton("cancel_job", "Cancel job",
+            class = "btn-danger btn-sm")
+        })),
     shiny::div(class = "progress-track",
       shiny::div(class = "progress-fill",
         style = paste0("width:", row$progress_percent[1], "%"))),
@@ -498,9 +580,9 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
       .studio_field("Retries", row$retry_count[1]),
       .studio_field("Queue", .studio_format_duration(row$queue_seconds[1])),
       .studio_field("Elapsed", .studio_format_duration(row$elapsed_seconds[1])),
-      .studio_field("Submitted", row$submitted_at[1]),
-      .studio_field("Started", row$started_at[1]),
-      .studio_field("Finished", row$finished_at[1]),
+      .studio_field("Submitted", .studio_display_time(row$submitted_at[1])),
+      .studio_field("Started", .studio_display_time(row$started_at[1])),
+      .studio_field("Finished", .studio_display_time(row$finished_at[1])),
       .studio_field("Error", row$error[1])
     )
   )
@@ -680,6 +762,21 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
 }
 
 #' @keywords internal
+.studio_display_time <- function(x) {
+  x <- as.character(x %||% "")
+  if (length(x) == 0 || is.na(x[1]) || !nzchar(x[1])) return("unknown")
+  value <- x[1]
+  parsed <- suppressWarnings(as.POSIXct(value, tz = "UTC",
+    format = "%Y-%m-%dT%H:%M:%OS"))
+  if (is.na(parsed)) {
+    parsed <- suppressWarnings(as.POSIXct(sub("Z$", "", value), tz = "UTC",
+      format = "%Y-%m-%dT%H:%M:%OS"))
+  }
+  if (is.na(parsed)) return(value)
+  format(parsed, "%Y-%m-%d %H:%M:%S UTC", tz = "UTC")
+}
+
+#' @keywords internal
 .studio_short_time <- function(x) {
   x <- as.character(x %||% "")
   x[is.na(x)] <- ""
@@ -737,13 +834,33 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
   .summary-tile.green { border-top:3px solid #16A34A; }
   .summary-tile.red { border-top:3px solid #DC2626; }
   .summary-tile.neutral { border-top:3px solid #64748B; }
-  .studio-grid { display:grid; grid-template-columns:minmax(360px,0.85fr) minmax(520px,1.4fr); gap:14px; align-items:start; }
+  .studio-grid { display:grid; grid-template-columns:minmax(340px,0.8fr) minmax(560px,1.5fr); gap:14px; align-items:start; }
   .studio-pane { background:#FFFFFF; border:1px solid #D1D5DB; border-radius:6px; padding:14px; min-width:0; }
   .pane-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:10px; }
   .pane-head h2, .detail-title h2 { margin:0; font-size:18px; letter-spacing:0; }
-  .pane-head .form-group { margin-bottom:0; min-width:220px; }
+  .pane-head .form-group { margin-bottom:0; min-width:160px; }
   table { font-size:13px; }
+  .job-list { display:flex; flex-direction:column; gap:10px; max-height:72vh; overflow:auto; padding-right:2px; }
+  .job-card { appearance:none; width:100%; text-align:left; background:#FFFFFF; border:1px solid #D1D5DB; border-left:5px solid #64748B; border-radius:6px; padding:11px; cursor:pointer; color:#111827; }
+  .job-card:hover, .job-card.active { border-color:#2563EB; box-shadow:0 0 0 2px #DBEAFE; }
+  .job-card.running { border-left-color:#2563EB; }
+  .job-card.pending { border-left-color:#D97706; }
+  .job-card.finished, .job-card.published { border-left-color:#16A34A; }
+  .job-card.failed { border-left-color:#DC2626; }
+  .job-card.cancelled { border-left-color:#4B5563; }
+  .job-card-main { display:flex; align-items:center; gap:8px; min-width:0; }
+  .job-card-main strong { font-size:14px; overflow-wrap:anywhere; }
+  .job-card-meta, .job-card-metrics { display:flex; flex-wrap:wrap; gap:8px; color:#64748B; font-size:12px; margin-top:8px; }
+  .job-progress-track { height:6px; background:#E5E7EB; border-radius:3px; overflow:hidden; margin-top:10px; }
+  .job-progress-fill { height:6px; background:#64748B; }
+  .job-card.running .job-progress-fill { background:#2563EB; }
+  .job-card.pending .job-progress-fill { background:#D97706; }
+  .job-card.finished .job-progress-fill, .job-card.published .job-progress-fill { background:#16A34A; }
+  .job-card.failed .job-progress-fill { background:#DC2626; }
+  .job-card.cancelled .job-progress-fill { background:#4B5563; }
   .detail-title { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:12px; }
+  .detail-subtitle { display:block; color:#64748B; font-size:12px; margin-top:4px; overflow-wrap:anywhere; }
+  .detail-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
   .state-pill { border-radius:999px; padding:4px 9px; font-size:12px; font-weight:700; background:#E5E7EB; color:#111827; }
   .state-pill.running { background:#DBEAFE; color:#1D4ED8; }
   .state-pill.pending { background:#FEF3C7; color:#92400E; }
