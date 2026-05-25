@@ -19,9 +19,9 @@ ds.hpc.outputs <- function(conns, job_id) {
 #' @param output_name Character output name registered by the job.
 #' @param symbol Character server-side symbol to assign.
 #' @return Invisibly `NULL`.
-#' @export
 ds.hpc.load_output <- function(conns, job_id, output_name,
                                  symbol = output_name) {
+  .deprecated_domain_api("ds.hpc.load_output")
   DSI::datashield.assign.expr(conns, symbol = symbol,
     expr = call("hpcLoadOutputDS", job_id, output_name))
   invisible(NULL)

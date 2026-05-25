@@ -6,8 +6,8 @@
 #' @param conns DSI connections object.
 #' @param job A dshpc_job object.
 #' @return A dshpc_submission with job_id and per-server details.
-#' @export
 ds.hpc.submit <- function(conns, job) {
+  .deprecated_domain_api("ds.hpc.submit")
   if (!inherits(job, "dshpc_job"))
     stop("'job' must be a dshpc_job object.", call. = FALSE)
 

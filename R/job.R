@@ -16,10 +16,10 @@
 #' @param resource_class Optional coarse resource class.
 #' @param ... Additional server-side job specification fields.
 #' @return A `dshpc_job` object.
-#' @export
 ds_job <- function(steps = NULL, name = NULL, label = NULL, tags = NULL,
                    visibility = "private", publish = NULL,
                    resource_class = NULL, pipeline = NULL, dag = NULL, ...) {
+  .deprecated_domain_api("ds_job")
   if (!is.null(pipeline) && !is.null(dag))
     stop("Use either 'pipeline' or 'dag', not both.", call. = FALSE)
   if (!is.null(pipeline)) dag <- pipeline

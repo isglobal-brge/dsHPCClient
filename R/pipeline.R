@@ -6,8 +6,8 @@
 #' @param step A `dshpc_step` object.
 #' @param inputs Optional upstream node ids, named inputs, or input descriptors.
 #' @return A `dshpc_pipeline_node`.
-#' @export
 ds_pipeline_node <- function(id, step, inputs = NULL) {
+  .deprecated_domain_api("ds_pipeline_node")
   if (!is.character(id) || length(id) != 1 || !nzchar(id))
     stop("'id' must be a non-empty string.", call. = FALSE)
   if (!inherits(step, "dshpc_step") && !is.list(step))
@@ -28,8 +28,8 @@ ds_pipeline_node <- function(id, step, inputs = NULL) {
 #'
 #' @param nodes List of nodes created by `ds_pipeline_node()`.
 #' @return A `dshpc_pipeline`.
-#' @export
 ds_pipeline <- function(nodes) {
+  .deprecated_domain_api("ds_pipeline")
   if (!is.list(nodes) || length(nodes) == 0)
     stop("'nodes' must be a non-empty list.", call. = FALSE)
   node_names <- names(nodes) %||% rep("", length(nodes))
