@@ -1,18 +1,20 @@
 Package: dsHPCClient
 Type: Package
-Title: DataSHIELD Client for Durable Federated Job Runtime
-Version: 0.1.0
+Title: Observability and Administration for dsHPC
+Version: 0.3.0
 Authors@R: c(
     person("David", "Sarrat González", role = c("aut", "cre"), email = "david.sarrat@isglobal.org"),
     person("Juan R", "González", role = "aut", email = "juanr.gonzalez@isglobal.org"))
 Author: David Sarrat González [aut, cre],
     Juan R González [aut]
 Maintainer: David Sarrat González <david.sarrat@isglobal.org>
-Description: Client-side DataSHIELD package for composing and orchestrating
-    durable federated jobs. Backend-agnostic control plane with adapters
-    for Opal (via opalr) and Armadillo (via MolgenisArmadillo). Provides
-    generic step constructors for session-plane and artifact-plane operations.
-    Domain-specific DSLs live in upstream packages.
+Description: Client-side R package providing analysts with a cross-domain
+    view of the dsHPC durable job queue (status, listing, scheduler
+    observability, Studio dashboard) plus admin-key-gated destructive
+    operations. Submission, output loading and pipeline composition are
+    server-side concerns; domain packages such as dsImagingClient expose their
+    own analyst-facing workflows that invoke domain DataSHIELD methods, which
+    in turn use dsHPC server-side via R-internal calls.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
@@ -26,7 +28,6 @@ Suggests:
     shiny,
     opalr,
     DSOpal,
-    MolgenisArmadillo,
     DSMolgenisArmadillo,
     testthat (>= 3.0.0),
     withr,
