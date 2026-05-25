@@ -380,7 +380,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
         shiny::showModal(shiny::modalDialog(
           title = "Cancel job",
           shiny::tags$p(shiny::tags$strong(
-            paste0("SEGURO que quieres cancelar el job ", job_id, "?"))),
+            paste0("Are you sure you want to cancel job ", job_id, "?"))),
           shiny::tags$p(
             "This sends an admin cancellation request to the selected server."),
           shiny::passwordInput("admin_password", "Admin password", value = ""),
@@ -482,7 +482,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
       shiny::span(row$scope[1]),
       shiny::span(row$label[1])),
     shiny::div(class = "job-card-metrics",
-      shiny::span(paste("Progress", row$progress[1])),
+      shiny::span(paste("Steps", row$progress[1])),
       shiny::span(paste("Elapsed",
         .studio_format_duration(row$elapsed_seconds[1]))),
       shiny::span(.studio_short_time(row$submitted_at[1]))),
@@ -567,6 +567,9 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
           shiny::actionButton("cancel_job", "Cancel job",
             class = "btn-danger btn-sm")
         })),
+    shiny::div(class = "progress-caption",
+      shiny::span("Step progress"),
+      shiny::span(row$progress[1])),
     shiny::div(class = "progress-track",
       shiny::div(class = "progress-fill",
         style = paste0("width:", row$progress_percent[1], "%"))),
@@ -576,7 +579,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
       .studio_field("Name", row$name[1]),
       .studio_field("Label", row$label[1]),
       .studio_field("Resource", row$resource_class[1]),
-      .studio_field("Progress", row$progress[1]),
+      .studio_field("Step progress", row$progress[1]),
       .studio_field("Retries", row$retry_count[1]),
       .studio_field("Queue", .studio_format_duration(row$queue_seconds[1])),
       .studio_field("Elapsed", .studio_format_duration(row$elapsed_seconds[1])),
@@ -858,7 +861,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
   .job-card.finished .job-progress-fill, .job-card.published .job-progress-fill { background:#16A34A; }
   .job-card.failed .job-progress-fill { background:#DC2626; }
   .job-card.cancelled .job-progress-fill { background:#4B5563; }
-  .detail-title { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:12px; }
+  .detail-title { display:flex; justify-content:space-between; gap:12px; align-items:center; margin:8px 0 12px; }
   .detail-subtitle { display:block; color:#64748B; font-size:12px; margin-top:4px; overflow-wrap:anywhere; }
   .detail-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
   .state-pill { border-radius:999px; padding:4px 9px; font-size:12px; font-weight:700; background:#E5E7EB; color:#111827; }
@@ -867,6 +870,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
   .state-pill.finished, .state-pill.published { background:#DCFCE7; color:#166534; }
   .state-pill.failed { background:#FEE2E2; color:#991B1B; }
   .state-pill.cancelled { background:#E5E7EB; color:#374151; }
+  .progress-caption { display:flex; justify-content:space-between; gap:12px; color:#64748B; font-size:12px; margin-bottom:6px; }
   .progress-track { height:10px; background:#E5E7EB; border-radius:5px; overflow:hidden; margin-bottom:14px; }
   .progress-fill { height:10px; background:#2563EB; }
   .detail-grid, .scheduler-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
