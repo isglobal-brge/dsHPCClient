@@ -21,8 +21,7 @@ dsImagingClient rather than constructing dsHPC jobs directly.
 
 ## For Domain Package Developers
 
-The historical job constructors and submission helpers remain available as
-internal compatibility helpers, but they are no longer exported for direct
-analyst use and emit deprecation warnings when called via `dsHPCClient:::`.
 Domain packages should expose their own DataSHIELD methods and compose dsHPC
-workflows server-side through the dsHPC R API.
+workflows server-side through the dsHPC R API. Spec builders, if desired, live
+in the server-side package as internal helpers such as `dsHPC:::ds_job()` and
+`dsHPC:::ds_step_run_artifact()`.

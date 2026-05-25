@@ -8,11 +8,3 @@ test_that("exported namespace is observation and admin only", {
   )
   expect_setequal(getNamespaceExports("dsHPCClient"), expected)
 })
-
-test_that("internal composition helper emits domain-mediated deprecation", {
-  withr::local_options(list(dshpcclient.silent_deprecation = FALSE))
-  expect_warning(
-    dsHPCClient:::ds_step_emit("out"),
-    "queue observability and admin operations only"
-  )
-})

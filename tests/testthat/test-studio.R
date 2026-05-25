@@ -116,13 +116,3 @@ test_that("Studio admin cancellation sends only selected job and server", {
   expect_true(res$ok)
   expect_equal(res$result$state, "CANCELLED")
 })
-
-test_that("ds_job carries optional display name", {
-  job <- ds_job(
-    name = "Human readable job",
-    label = "dsImaging",
-    steps = list(ds_step_emit("out"))
-  )
-  expect_equal(job$name, "Human readable job")
-  expect_output(print(job), "Name: Human readable job")
-})

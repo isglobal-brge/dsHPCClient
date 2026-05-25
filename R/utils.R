@@ -1,28 +1,5 @@
 # Module: Client Utilities
 
-#' Emit the domain-mediated deprecation notice for internal composition helpers
-#' @keywords internal
-.deprecated_domain_api <- function(name) {
-  if (isTRUE(getOption("dshpcclient.silent_deprecation", FALSE)))
-    return(invisible(FALSE))
-  .Deprecated(
-    new = "domain client API",
-    package = "dsHPCClient",
-    msg = paste0(
-      "dsHPCClient::", name, " is deprecated for direct analyst ",
-      "use. dsHPCClient is now scoped to queue observability and ",
-      "admin operations only. Submission, pipeline composition and ",
-      "output loading are server-side concerns mediated by domain ",
-      "packages (e.g., dsImagingClient::ds.imaging.* functions)."
-    )
-  )
-}
-
-#' @keywords internal
-.generate_job_id <- function() {
-  paste0("job_", gsub("-", "", uuid::UUIDgenerate()))
-}
-
 #' @keywords internal
 .generate_symbol <- function(prefix = "dsH") {
   paste0(prefix, ".",
