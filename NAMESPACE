@@ -2,11 +2,7 @@
 
 S3method("$",dshpc_result)
 S3method(as.data.frame,dshpc_result)
-S3method(print,dshpc_job)
-S3method(print,dshpc_pipeline)
 S3method(print,dshpc_result)
-S3method(print,dshpc_step)
-S3method(print,dshpc_submission)
 export(ds.hpc.admin.cancel)
 export(ds.hpc.admin.list)
 export(ds.hpc.capabilities)

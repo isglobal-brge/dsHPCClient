@@ -12,21 +12,6 @@ ds.hpc.outputs <- function(conns, job_id) {
   dshpc_result(per_site = results)
 }
 
-#' Load a completed job output into the server session
-#'
-#' @param conns DSI connections object.
-#' @param job_id Character job id.
-#' @param output_name Character output name registered by the job.
-#' @param symbol Character server-side symbol to assign.
-#' @return Invisibly `NULL`.
-ds.hpc.load_output <- function(conns, job_id, output_name,
-                                 symbol = output_name) {
-  .deprecated_domain_api("ds.hpc.load_output")
-  DSI::datashield.assign.expr(conns, symbol = symbol,
-    expr = call("hpcLoadOutputDS", job_id, output_name))
-  invisible(NULL)
-}
-
 #' Report dsHPC server capabilities
 #'
 #' @param conns DSI connections object.

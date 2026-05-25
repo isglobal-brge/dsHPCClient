@@ -1,7 +1,7 @@
 Package: dsHPCClient
 Type: Package
 Title: Observability and Administration for dsHPC
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
     person("David", "Sarrat González", role = c("aut", "cre"), email = "david.sarrat@isglobal.org"),
     person("Juan R", "González", role = "aut", email = "juanr.gonzalez@isglobal.org"))
@@ -20,7 +20,6 @@ Encoding: UTF-8
 Depends:
     R (>= 4.1.0)
 Imports:
-    uuid,
     stats,
     DSI,
     jsonlite
