@@ -5,7 +5,9 @@
 #' @param steps List of `dshpc_step` objects created with `ds_step_*()`.
 #' @param pipeline Optional DAG pipeline created with `ds_pipeline()`.
 #' @param dag Optional raw DAG list for advanced users.
-#' @param name Optional human-readable job name for client-side displays.
+#' @param name Optional human-readable job name for client-side displays. If it
+#'   contains `{number}`, dsHPC resolves that placeholder on submit using the
+#'   next visible job number on each server.
 #' @param label Optional job label used for filtering and domain ownership.
 #' @param tags Optional character vector of operational tags.
 #' @param visibility Character visibility marker, usually `"private"` or
