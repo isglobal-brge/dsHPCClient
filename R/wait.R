@@ -3,10 +3,18 @@
 #' Wait for a dsHPC job to reach a terminal state
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character job id.
+#' @param job_id Character; job id or submission symbol (see
+#'   `ds.hpc.job_id()`).
 #' @param timeout Numeric timeout in seconds.
 #' @param poll_interval Numeric polling interval in seconds.
 #' @return A `dshpc_result` status object from `ds.hpc.status()`.
+#' @examples
+#' \donttest{
+#' # conns <- DSI::datashield.login(...)  # live DataSHIELD session
+#' ids <- ds.hpc.job_id(conns, "jobA")
+#' st <- ds.hpc.wait(conns, ids[[1]], timeout = 600, poll_interval = 5)
+#' print(st)
+#' }
 #' @export
 ds.hpc.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
   deadline <- Sys.time() + timeout

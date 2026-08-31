@@ -6,7 +6,15 @@
 #' @param label Character or NULL; optional server-side label filter.
 #' @param mode Character; "mine", "mine+global", or "global". Reserved for
 #'   deployments that expose scoped list policies.
-#' @return A `dshpc_result` with one data.frame per site.
+#' @return A `dshpc_result` with one data.frame per site (columns `job_id`,
+#'   `state`, `name`, `label`, `submitted_at`, `progress`); printed as a
+#'   formatted table.
+#' @examples
+#' \donttest{
+#' # conns <- DSI::datashield.login(...)  # live DataSHIELD session
+#' ds.hpc.list(conns)
+#' ds.hpc.list(conns, label = "dsImaging")
+#' }
 #' @export
 ds.hpc.list <- function(conns, label = NULL, mode = "mine+global") {
   mode <- match.arg(mode, c("mine", "mine+global", "global"))

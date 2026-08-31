@@ -9,11 +9,20 @@ ds.hpc.outputs(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character job id.}
+\item{job_id}{Character; job id or submission symbol (see
+\code{ds.hpc.job_id()}).}
 }
 \value{
-A \code{dshpc_result} with one output metadata data.frame per site.
+A \code{dshpc_result} with one output metadata data.frame per site
+(columns \code{name}, \code{kind}, \code{safe_for_client}, \code{size_bytes}); printed as
+name/kind/size rows.
 }
 \description{
 List outputs registered for a dsHPC job
+}
+\examples{
+\donttest{
+# conns <- DSI::datashield.login(...)  # live DataSHIELD session
+ds.hpc.outputs(conns, "jobA")
+}
 }

@@ -9,13 +9,21 @@ ds.hpc.logs(conns, job_id, last_n = 50L)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character job id.}
+\item{job_id}{Character; job id or submission symbol (see
+\code{ds.hpc.job_id()}).}
 
 \item{last_n}{Integer number of log lines requested from each site.}
 }
 \value{
-A \code{dshpc_result} with per-site character vectors.
+A \code{dshpc_result} with per-site character vectors; printed as
+indented log lines.
 }
 \description{
 Tail sanitized dsHPC job logs
+}
+\examples{
+\donttest{
+# conns <- DSI::datashield.login(...)  # live DataSHIELD session
+ds.hpc.logs(conns, "jobA", last_n = 20)
+}
 }

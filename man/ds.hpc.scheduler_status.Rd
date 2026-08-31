@@ -10,10 +10,29 @@ ds.hpc.scheduler_status(conns)
 \item{conns}{DSI connections object.}
 }
 \value{
-A dshpc_result with per-site scheduler status lists.
+A \code{dshpc_result} whose per-site payload is a named list with
+elements:
+\itemize{
+\item \code{mode}: scheduler mode string.
+\item \code{executor}: executor backend status (backend name, availability,
+reason when unavailable).
+\item \code{cell}: cell/worker health -- \code{cell_id}, \code{node_id}, \code{leader} (lock
+holder and heartbeat) and a \code{workers} data.frame.
+\item \code{node}: detected node resource budget (cpu/memory/gpu).
+\item \code{usage}: resources currently consumed by running jobs.
+\item \code{throttles}: active concurrency throttles.
+\item \code{cooldowns}: data.frame of runner cooldowns currently in force.
+}
 }
 \description{
 Reports backend-agnostic scheduler state for each connected server, including
 cell/worker health, detected node budget, active usage, and GPU inventory when
 available.
+}
+\examples{
+\donttest{
+# conns <- DSI::datashield.login(...)  # live DataSHIELD session
+sch <- ds.hpc.scheduler_status(conns)
+str(sch$per_site[[1]][c("mode", "executor", "cell")], max.level = 2)
+}
 }

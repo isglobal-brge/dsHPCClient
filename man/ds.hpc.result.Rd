@@ -9,11 +9,19 @@ ds.hpc.result(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character job id.}
+\item{job_id}{Character; job id or submission symbol (see
+\code{ds.hpc.job_id()}).}
 }
 \value{
 A \code{dshpc_result} with one result object per site.
 }
 \description{
 Fetch the disclosure-safe dsHPC job result
+}
+\examples{
+\donttest{
+# conns <- DSI::datashield.login(...)  # live DataSHIELD session
+res <- ds.hpc.result(conns, "jobA")
+str(res$per_site)
+}
 }

@@ -19,6 +19,29 @@ Submission, pipeline composition and output loading are mediated by domain
 packages. For imaging workflows, use the `ds.imaging.*` functions from
 dsImagingClient rather than constructing dsHPC jobs directly.
 
+## Symbol-Based Submission Pattern
+
+When a deployment allowlists `hpcSubmitDS` for direct DSI use, submission
+happens through `datashield.assign()`, which returns nothing to the analyst --
+the submission handle (including the job id) lives server-side in the
+assigned symbol:
+
+```r
+DSI::datashield.assign(conns, "jobA", call("hpcSubmitDS", spec_enc))
+
+# Resolve the per-server job ids from the symbol:
+ids <- ds.hpc.job_id(conns, "jobA")
+
+# Job ids differ per server; monitor with the id (or keep using the symbol):
+ds.hpc.status(conns, "jobA")
+ds.hpc.wait(conns, ids[["site1"]])
+ds.hpc.outputs(conns, ids[["site1"]])
+ds.hpc.logs(conns, ids[["site1"]])
+```
+
+Deduplication semantics: servers deduplicate byte-identical specs against
+FINISHED/PUBLISHED jobs only; concurrent identical submissions both run.
+
 ## For Domain Package Developers
 
 Domain packages should expose their own DataSHIELD methods and compose dsHPC

@@ -29,6 +29,12 @@
       results[[srv]] <- res[[srv]]
     }, error = function(e) { errors[[srv]] <<- e$message })
   }
+  # Surface per-server failures at call time; they are also kept in the
+  # "ds_errors" attribute, which print.dshpc_result renders.
+  for (srv in names(errors)) {
+    warning("dsHPC call failed on server '", srv, "': ", errors[[srv]],
+            call. = FALSE)
+  }
   if (length(errors) > 0) attr(results, "ds_errors") <- errors
   results
 }

@@ -23,3 +23,13 @@ test_that("generate_symbol is unique", {
   syms <- replicate(100, dsHPCClient:::.generate_symbol())
   expect_equal(length(unique(syms)), 100L)
 })
+
+test_that(".ds_safe_aggregate warns per failed server and records ds_errors", {
+  fake_conns <- list(siteX = structure(list(), class = "not_a_connection"))
+  expect_warning(
+    res <- dsHPCClient:::.ds_safe_aggregate(fake_conns, quote(anyCallDS())),
+    "siteX")
+  errs <- attr(res, "ds_errors")
+  expect_false(is.null(errs))
+  expect_true("siteX" %in% names(errs))
+})

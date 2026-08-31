@@ -9,11 +9,22 @@ ds.hpc.status(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character job id.}
+\item{job_id}{Character; a job id, or the symbol name used in
+\code{datashield.assign()} when submitting (the server resolves the symbol to
+its job id; see \code{ds.hpc.job_id()}).}
 }
 \value{
 A \code{dshpc_result} with one status list per site.
 }
 \description{
 Get dsHPC job status
+}
+\examples{
+\donttest{
+# conns <- DSI::datashield.login(...)  # live DataSHIELD session
+DSI::datashield.assign(conns, "jobA", call("hpcSubmitDS", spec_enc))
+ds.hpc.status(conns, "jobA")                 # by symbol
+ids <- ds.hpc.job_id(conns, "jobA")
+ds.hpc.status(conns, ids[[1]])               # by job id
+}
 }

@@ -15,8 +15,17 @@ ds.hpc.list(conns, label = NULL, mode = "mine+global")
 deployments that expose scoped list policies.}
 }
 \value{
-A \code{dshpc_result} with one data.frame per site.
+A \code{dshpc_result} with one data.frame per site (columns \code{job_id},
+\code{state}, \code{name}, \code{label}, \code{submitted_at}, \code{progress}); printed as a
+formatted table.
 }
 \description{
 List submitted dsHPC jobs
+}
+\examples{
+\donttest{
+# conns <- DSI::datashield.login(...)  # live DataSHIELD session
+ds.hpc.list(conns)
+ds.hpc.list(conns, label = "dsImaging")
+}
 }
