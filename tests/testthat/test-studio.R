@@ -64,38 +64,23 @@ test_that("Studio tables include display name and safe output metadata", {
   expect_equal(rendered$size, "2 KB")
 })
 
-test_that("Studio data queries selected servers and isolates aggregate errors", {
+test_that("analyst Studio endpoints are retired before any aggregate call", {
   conns <- list(node1 = list(), node2 = list())
-  calls <- character(0)
+  calls <- 0L
 
   testthat::local_mocked_bindings(
     datashield.aggregate = function(conns, expr) {
-      srv <- names(conns)[1]
-      calls <<- c(calls, srv)
-      expect_equal(as.character(expr[[1]]), "hpcStudioDS")
-      if (identical(srv, "node2")) stop("dsHPC is not available")
-      out <- list(
-        server_time = "2026-05-25T10:00:00.000Z",
-        jobs = data.frame(job_id = "job_a", state = "RUNNING",
-          stringsAsFactors = FALSE),
-        steps = data.frame(), dag_nodes = data.frame(),
-        dag_edges = data.frame(), outputs = data.frame(),
-        events = data.frame(), scheduler = list()
-      )
-      stats::setNames(list(out), srv)
+      calls <<- calls + 1L
+      stop("must not be called")
     },
     .package = "DSI"
   )
 
-  one <- ds.hpc.studio_data(conns, server = "node1")
-  expect_equal(calls, "node1")
-  expect_true(one$node1$ok)
-
-  both <- ds.hpc.studio_data(conns)
-  expect_equal(calls, c("node1", "node1", "node2"))
-  expect_true(both$node1$ok)
-  expect_false(both$node2$ok)
-  expect_match(both$node2$error, "not available")
+  expect_error(ds.hpc.studio_data(conns, server = "node1"), "retired")
+  expect_error(ds.hpc.studio(conns), "retired")
+  expect_error(ds.hpc.list(conns), "retired")
+  expect_error(ds.hpc.scheduler_status(conns), "retired")
+  expect_equal(calls, 0L)
 })
 
 test_that("Studio admin cancellation sends only selected job and server", {

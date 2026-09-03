@@ -1,36 +1,12 @@
 # Module: Job Summary View
 
-#' Print a formatted summary of all jobs
+#' Retired cross-workflow job summary
 #'
-#' @param conns DSI connections object.
-#' @param label Character or NULL; filter by label.
+#' @param conns Ignored compatibility argument.
+#' @param label Ignored compatibility argument.
+#' @return This function always raises the retired-listing error.
 #' @export
 ds.hpc.summary <- function(conns, label = NULL) {
-  jl <- ds.hpc.list(conns, label = label)
-
-  for (srv in names(jl$per_site)) {
-    df <- jl$per_site[[srv]]
-    cat("-- ", srv, " ", paste(rep("-", 50), collapse = ""), "\n", sep = "")
-
-    if (!is.data.frame(df) || nrow(df) == 0) {
-      cat("  (no jobs)\n\n")
-      next
-    }
-
-    # Count by state
-    states <- table(df$state)
-    cat("  Total:", nrow(df), "jobs")
-    for (s in names(states)) cat(" |", s, ":", states[s])
-    cat("\n\n")
-
-    # List each job
-    for (i in seq_len(nrow(df))) {
-      lab <- if (!is.na(df$label[i])) paste0(" <", df$label[i], ">") else ""
-      cat("  ", df$state[i], lab, "\n", sep = "")
-      cat("    ID: ", df$job_id[i], "\n")
-      cat("    Progress: ", df$progress[i],
-          "  Submitted: ", df$submitted_at[i], "\n\n")
-    }
-  }
-  invisible(jl)
+  stop("ds.hpc.summary() was retired with generic job enumeration; use a domain-specific workflow summary.",
+    call. = FALSE)
 }

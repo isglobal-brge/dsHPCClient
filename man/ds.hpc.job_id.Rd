@@ -9,37 +9,23 @@ ds.hpc.job_id(conns, symbol)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{symbol}{Character; the symbol used in \code{datashield.assign()}. A raw
-job id also works (it resolves to itself).}
+\item{symbol}{Character; the symbol assigned by a domain workflow.}
 }
 \value{
-Named character vector mapping server name to job id (\code{NA} when a
+Named character vector mapping server name to an opaque job bearer (\code{NA} when a
 server could not resolve the symbol).
 }
 \description{
-Submission through \code{DSI::datashield.assign(conns, "jobA", call("hpcSubmitDS", spec_enc))} returns nothing to the analyst: the
-submission handle (including the job id) lives server-side in the assigned
-symbol. \code{ds.hpc.job_id()} resolves the per-server job ids the same way
-\code{ds.hpc.status()} does -- the server-side \code{hpcStatusDS} method accepts a
-symbol name and reads \code{job_id} from the assigned object -- so the ids can
-be reused with \code{ds.hpc.wait()}, \code{ds.hpc.result()}, \code{ds.hpc.outputs()} and
-\code{ds.hpc.logs()}.
-}
-\details{
-This is the recommended symbol-based submission pattern:
-\enumerate{
-\item \code{DSI::datashield.assign(conns, "jobA", call("hpcSubmitDS", spec_enc))}
-\item \code{ids <- ds.hpc.job_id(conns, "jobA")}
-\item \code{ds.hpc.wait(conns, ids[["site1"]])} (job ids differ per server).
-}
-
-Deduplication semantics: servers deduplicate byte-identical specs against
-FINISHED/PUBLISHED jobs only; concurrent identical submissions both run.
+Domain packages assign an opaque submission handle to a server-side symbol.
+\code{ds.hpc.job_id()} explicitly exports the per-server bearer references through
+\code{hpcJobReferenceDS}. Routine status and result calls do not return or retain
+this transferable credential. References can be reused with \code{ds.hpc.wait()},
+\code{ds.hpc.result()}, \code{ds.hpc.outputs()} and \code{ds.hpc.logs()}.
 }
 \examples{
-\donttest{
+\dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
-DSI::datashield.assign(conns, "jobA", call("hpcSubmitDS", spec_enc))
+# job <- dsImagingClient::ds.imaging.qc.metrics(conns, symbol = "jobA")
 ids <- ds.hpc.job_id(conns, "jobA")
 ds.hpc.wait(conns, ids[[1]])
 }

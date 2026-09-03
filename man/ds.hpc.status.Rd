@@ -9,9 +9,8 @@ ds.hpc.status(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; a job id, or the symbol name used in
-\code{datashield.assign()} when submitting (the server resolves the symbol to
-its job id; see \code{ds.hpc.job_id()}).}
+\item{job_id}{Character; opaque bearer or the symbol assigned by a domain
+workflow (see \code{ds.hpc.job_id()}).}
 }
 \value{
 A \code{dshpc_result} with one status list per site.
@@ -20,11 +19,11 @@ A \code{dshpc_result} with one status list per site.
 Get dsHPC job status
 }
 \examples{
-\donttest{
+\dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
-DSI::datashield.assign(conns, "jobA", call("hpcSubmitDS", spec_enc))
+# job <- dsImagingClient::ds.imaging.qc.metrics(conns, symbol = "jobA")
 ds.hpc.status(conns, "jobA")                 # by symbol
 ids <- ds.hpc.job_id(conns, "jobA")
-ds.hpc.status(conns, ids[[1]])               # by job id
+ds.hpc.status(conns, ids[[1]])               # by opaque bearer
 }
 }

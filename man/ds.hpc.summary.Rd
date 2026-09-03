@@ -2,15 +2,18 @@
 % Please edit documentation in R/summary.R
 \name{ds.hpc.summary}
 \alias{ds.hpc.summary}
-\title{Print a formatted summary of all jobs}
+\title{Retired cross-workflow job summary}
 \usage{
 ds.hpc.summary(conns, label = NULL)
 }
 \arguments{
-\item{conns}{DSI connections object.}
+\item{conns}{Ignored compatibility argument.}
 
-\item{label}{Character or NULL; filter by label.}
+\item{label}{Ignored compatibility argument.}
+}
+\value{
+This function always raises the retired-listing error.
 }
 \description{
-Print a formatted summary of all jobs
+Retired cross-workflow job summary
 }

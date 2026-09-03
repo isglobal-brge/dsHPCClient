@@ -1,36 +1,17 @@
 # Module: Job Listing
 
-#' List submitted dsHPC jobs
+#' Retired analyst job listing
 #'
-#' @param conns DSI connections object.
-#' @param label Character or NULL; optional server-side label filter.
-#' @param mode Character; "mine", "mine+global", or "global". Reserved for
-#'   deployments that expose scoped list policies.
-#' @return A `dshpc_result` with one data.frame per site (columns `job_id`,
-#'   `state`, `name`, `label`, `submitted_at`, `progress`); printed as a
-#'   formatted table.
-#' @examples
-#' \donttest{
-#' # conns <- DSI::datashield.login(...)  # live DataSHIELD session
-#' ds.hpc.list(conns)
-#' ds.hpc.list(conns, label = "dsImaging")
-#' }
+#' Job discovery across workflows is not an analyst operation. Keep the opaque
+#' symbol returned by the domain package and call its status method instead.
+#'
+#' @param conns Ignored compatibility argument.
+#' @param label Ignored compatibility argument.
+#' @param mode Ignored compatibility argument.
+#' @return This function always raises an error before contacting a server.
 #' @export
 ds.hpc.list <- function(conns, label = NULL, mode = "mine+global") {
-  mode <- match.arg(mode, c("mine", "mine+global", "global"))
-  results <- list()
-  for (srv in names(conns)) {
-    r <- tryCatch({
-      backend <- .detect_backend(conns[[srv]])
-      scope <- .ds_encode(list(.owner = backend$username))
-      if (is.null(label))
-        DSI::datashield.aggregate(conns[srv],
-          expr = call("hpcListDS", NULL, scope, mode))
-      else
-        DSI::datashield.aggregate(conns[srv],
-          expr = call("hpcListDS", label, scope, mode))
-    }, error = function(e) list())
-    results[[srv]] <- r[[srv]] %||% .empty_job_list()
-  }
-  dshpc_result(per_site = results)
+  stop(
+    "Analyst job listing is retired. Keep the opaque symbol returned by the ",
+    "domain package and query that workflow directly.", call. = FALSE)
 }

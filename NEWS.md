@@ -1,3 +1,23 @@
+# dsHPCClient 0.3.3
+
+* Calls carrying job bearers or admin keys now suppress DataSHIELD expression
+  progress and raw remote errors, restoring the caller's progress and error
+  options even when a request fails.
+* `ds.hpc.wait()` no longer prints opaque job bearers, preventing a console or
+  notebook transcript from becoming a transferable job credential.
+* `ds.hpc.job_id()` now uses the explicit `hpcJobReferenceDS()` endpoint.
+  Routine status and result objects no longer contain transferable bearers.
+* Retired analyst-wide job listing, summary, scheduler topology, and Studio
+  entry points. Compatibility functions fail locally without making a
+  DataSHIELD call, and the legacy summary renderer that printed job identifiers
+  has been removed. Generic result printing redacts any bearer-shaped job
+  reference defensively.
+* Monitoring now documents and uses only an existing opaque domain-workflow
+  symbol or per-job bearer. Public status no longer expects exact step,
+  retry, label, or timestamp fields.
+* Generic job submission and output loading examples were removed in favour
+  of domain-mediated workflows such as dsImagingClient.
+
 # dsHPCClient 0.3.2
 
 * `print.dshpc_result()` now dispatches on payload shape: job listings render

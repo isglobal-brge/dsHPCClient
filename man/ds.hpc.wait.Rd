@@ -9,7 +9,7 @@ ds.hpc.wait(conns, job_id, timeout = 3600, poll_interval = 5)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; job id or submission symbol (see
+\item{job_id}{Character; opaque bearer or domain workflow symbol (see
 \code{ds.hpc.job_id()}).}
 
 \item{timeout}{Numeric timeout in seconds.}
@@ -23,7 +23,7 @@ A \code{dshpc_result} status object from \code{ds.hpc.status()}.
 Wait for a dsHPC job to reach a terminal state
 }
 \examples{
-\donttest{
+\dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 ids <- ds.hpc.job_id(conns, "jobA")
 st <- ds.hpc.wait(conns, ids[[1]], timeout = 600, poll_interval = 5)

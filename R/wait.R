@@ -3,13 +3,13 @@
 #' Wait for a dsHPC job to reach a terminal state
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character; job id or submission symbol (see
+#' @param job_id Character; opaque bearer or domain workflow symbol (see
 #'   `ds.hpc.job_id()`).
 #' @param timeout Numeric timeout in seconds.
 #' @param poll_interval Numeric polling interval in seconds.
 #' @return A `dshpc_result` status object from `ds.hpc.status()`.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 #' ids <- ds.hpc.job_id(conns, "jobA")
 #' st <- ds.hpc.wait(conns, ids[[1]], timeout = 600, poll_interval = 5)
@@ -23,20 +23,21 @@ ds.hpc.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
   terminal <- c("FINISHED", "PUBLISHED", "FAILED", "CANCELLED")
   last <- list()
 
-  message("Waiting for job '", job_id, "' ...")
+  # job_id may be a transferable bearer. Never copy it into consoles,
+  # notebooks, CI logs, or captured transcripts.
+  message("Waiting for job reference ...")
   while (Sys.time() < deadline) {
     for (srv in srv_names[!done]) {
       st <- tryCatch({
-        r <- DSI::datashield.aggregate(conns[srv],
+        r <- .ds_private_aggregate(conns[srv],
           expr = call("hpcStatusDS", job_id))
         r[[srv]]
       }, error = function(e) NULL)
 
       if (is.null(st)) next
-      key <- paste0(st$step_index %||% 0, "/", st$total_steps %||% 0, ":", st$state)
+      key <- as.character(st$state %||% "UNKNOWN")
       if (!identical(last[[srv]], key)) {
-        message("  ", srv, ": ", st$state, " [",
-                st$step_index %||% 0, "/", st$total_steps %||% 0, "]")
+        message("  ", srv, ": ", key)
         last[[srv]] <- key
       }
       if (st$state %in% terminal) done[[srv]] <- TRUE

@@ -2,22 +2,22 @@
 % Please edit documentation in R/studio.R
 \name{ds.hpc.studio_data}
 \alias{ds.hpc.studio_data}
-\title{Fetch dsHPC Studio data}
+\title{Retired analyst dsHPC Studio data}
 \usage{
 ds.hpc.studio_data(conns, server = NULL, label = NULL, mode = "mine+global")
 }
 \arguments{
-\item{conns}{DSI connections object.}
+\item{conns}{Ignored compatibility argument.}
 
-\item{server}{Character server name. If NULL, all servers are queried.}
+\item{server}{Ignored compatibility argument.}
 
-\item{label}{Character or NULL; optional job label filter.}
+\item{label}{Ignored compatibility argument.}
 
-\item{mode}{Character; \code{"mine"}, \code{"mine+global"}, or \code{"global"}.}
+\item{mode}{Ignored compatibility argument.}
 }
 \value{
-A \code{dshpc_result} with one Studio snapshot per queried server.
+This function always raises an error before contacting a server.
 }
 \description{
-Fetch dsHPC Studio data
+Retired analyst dsHPC Studio data
 }

@@ -1,12 +1,16 @@
-test_that("ds.hpc.job_id resolves per-site job ids via status", {
+test_that("ds.hpc.job_id uses the explicit reference method", {
+  methods <- character(0)
   testthat::local_mocked_bindings(
-    ds.hpc.status = function(conns, job_id) dsHPCClient:::dshpc_result(
-      per_site = list(
-        site1 = list(job_id = "job_123", state = "PENDING"),
-        site2 = list(state = "FAILED"))),
-    .package = "dsHPCClient")
+    datashield.aggregate = function(conns, expr) {
+      methods <<- c(methods, as.character(expr[[1]]))
+      server <- names(conns)[1]
+      stats::setNames(list(if (identical(server, "site1"))
+        "B64:opaque-reference" else 7L), server)
+    },
+    .package = "DSI")
 
   ids <- ds.hpc.job_id(list(site1 = 1, site2 = 2), "jobA")
-  expect_equal(ids[["site1"]], "job_123")
+  expect_equal(ids[["site1"]], "B64:opaque-reference")
   expect_true(is.na(ids[["site2"]]))
+  expect_identical(methods, rep("hpcJobReferenceDS", 2L))
 })

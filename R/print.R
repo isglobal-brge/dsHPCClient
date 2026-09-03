@@ -37,7 +37,11 @@ print.dshpc_result <- function(x, ...) {
       cat("  ", srv, ": (no jobs)\n", sep = "")
     } else {
       cat("  ", srv, ": ", nrow(site), " job(s)\n", sep = "")
-      .print_indented_df(site)
+      display <- site
+      display$job_id <- as.character(display$job_id)
+      bearer <- !is.na(display$job_id) & startsWith(display$job_id, "B64:")
+      display$job_id[bearer] <- "<opaque job reference>"
+      .print_indented_df(display)
     }
     return(invisible(NULL))
   }
@@ -61,8 +65,9 @@ print.dshpc_result <- function(x, ...) {
     if (length(site) == 0) {
       cat("  ", srv, ": (no log lines)\n", sep = "")
     } else {
+      display <- gsub("B64:[A-Za-z0-9_-]+", "<opaque job reference>", site)
       cat("  ", srv, ": ", length(site), " log line(s)\n", sep = "")
-      cat(paste0("    ", site, collapse = "\n"), "\n", sep = "")
+      cat(paste0("    ", display, collapse = "\n"), "\n", sep = "")
     }
     return(invisible(NULL))
   }
@@ -79,7 +84,9 @@ print.dshpc_result <- function(x, ...) {
   if (is.null(site) || length(site) == 0) {
     cat("  ", srv, ": (empty)\n", sep = "")
   } else if (is.atomic(site) && length(site) == 1) {
-    cat("  ", srv, ": ", format(site), "\n", sep = "")
+    value <- if (is.character(site) && !is.na(site) &&
+        startsWith(site, "B64:")) "<opaque job reference>" else format(site)
+    cat("  ", srv, ": ", value, "\n", sep = "")
   } else {
     cat("  ", srv, ": <", class(site)[1], "> with ", length(site),
         " element(s)\n", sep = "")

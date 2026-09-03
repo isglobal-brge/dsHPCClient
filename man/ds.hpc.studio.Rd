@@ -2,7 +2,7 @@
 % Please edit documentation in R/studio.R
 \name{ds.hpc.studio}
 \alias{ds.hpc.studio}
-\title{Launch dsHPC Studio}
+\title{Retired analyst dsHPC Studio}
 \usage{
 ds.hpc.studio(
   conns,
@@ -12,19 +12,18 @@ ds.hpc.studio(
 )
 }
 \arguments{
-\item{conns}{DSI connections object.}
+\item{conns}{Ignored compatibility argument.}
 
-\item{host}{Character host passed to \code{shiny::runApp()}.}
+\item{host}{Ignored compatibility argument.}
 
-\item{port}{Optional port passed to \code{shiny::runApp()}.}
+\item{port}{Ignored compatibility argument.}
 
-\item{launch.browser}{Logical; passed to \code{shiny::runApp()}.}
+\item{launch.browser}{Ignored compatibility argument.}
 }
 \value{
-The return value from \code{shiny::runApp()}.
+This function always raises an error before contacting a server.
 }
 \description{
-Opens a local Shiny dashboard for browsing dsHPC jobs on a pool of
-DataSHIELD connections. Studio queries only the selected server and refreshes
-on demand.
+Cross-workflow Studio requires scheduler and job enumeration data, so it is
+no longer available over analyst DataSHIELD connections.
 }

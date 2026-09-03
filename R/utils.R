@@ -19,21 +19,41 @@
 }
 
 #' @keywords internal
+.ds_private_aggregate <- function(conns, expr) {
+  # DSI creates a progress::progress_bar before it checks its own progress
+  # option, so both switches are required to keep expressions off consoles.
+  old_options <- options(
+    datashield.progress = FALSE,
+    datashield.errors.print = FALSE,
+    progress_enabled = FALSE
+  )
+  on.exit(options(old_options), add = TRUE)
+
+  tryCatch(
+    DSI::datashield.aggregate(conns, expr = expr),
+    error = function(e) {
+      stop("Remote dsHPC request failed.", call. = FALSE)
+    }
+  )
+}
+
+#' @keywords internal
 .ds_safe_aggregate <- function(conns, expr) {
   server_names <- names(conns)
   results <- list()
   errors <- list()
   for (srv in server_names) {
     tryCatch({
-      res <- DSI::datashield.aggregate(conns[srv], expr = expr)
+      res <- .ds_private_aggregate(conns[srv], expr = expr)
       results[[srv]] <- res[[srv]]
-    }, error = function(e) { errors[[srv]] <<- e$message })
+    }, error = function(e) {
+      errors[[srv]] <<- "Remote dsHPC request failed."
+    })
   }
   # Surface per-server failures at call time; they are also kept in the
   # "ds_errors" attribute, which print.dshpc_result renders.
   for (srv in names(errors)) {
-    warning("dsHPC call failed on server '", srv, "': ", errors[[srv]],
-            call. = FALSE)
+    warning("dsHPC call failed on server '", srv, "'.", call. = FALSE)
   }
   if (length(errors) > 0) attr(results, "ds_errors") <- errors
   results

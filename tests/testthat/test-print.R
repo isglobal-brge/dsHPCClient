@@ -53,6 +53,28 @@ test_that("print renders an empty jobs data.frame as (no jobs)", {
   expect_output(print(result), "(no jobs)", fixed = TRUE)
 })
 
+test_that("print never renders a bearer-shaped job reference", {
+  secret <- "B64:c2VjcmV0LWpvYi1iZWFyZXI"
+  df <- data.frame(job_id = secret, state = "RUNNING",
+    stringsAsFactors = FALSE)
+  result <- dsHPCClient:::dshpc_result(per_site = list(site1 = df))
+  output <- paste(capture.output(print(result)), collapse = "\n")
+
+  expect_false(grepl(secret, output, fixed = TRUE))
+  expect_match(output, "opaque job reference", fixed = TRUE)
+
+  scalar <- dsHPCClient:::dshpc_result(per_site = list(site1 = secret))
+  scalar_output <- paste(capture.output(print(scalar)), collapse = "\n")
+  expect_false(grepl(secret, scalar_output, fixed = TRUE))
+  expect_match(scalar_output, "opaque job reference", fixed = TRUE)
+})
+
+test_that("retired summary has no legacy job-id renderer", {
+  expect_error(ds.hpc.summary(NULL), "retired", fixed = TRUE)
+  body_text <- paste(deparse(body(ds.hpc.summary)), collapse = "\n")
+  expect_false(grepl("job_id", body_text, fixed = TRUE))
+})
+
 test_that("print renders outputs as name/kind/size rows", {
   df <- data.frame(
     name = c("result.csv", "note"),

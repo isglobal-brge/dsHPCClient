@@ -9,7 +9,7 @@ ds.hpc.outputs(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; job id or submission symbol (see
+\item{job_id}{Character; opaque bearer or domain workflow symbol (see
 \code{ds.hpc.job_id()}).}
 }
 \value{
@@ -21,7 +21,7 @@ name/kind/size rows.
 List outputs registered for a dsHPC job
 }
 \examples{
-\donttest{
+\dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 ds.hpc.outputs(conns, "jobA")
 }

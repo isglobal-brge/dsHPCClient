@@ -2,30 +2,21 @@
 % Please edit documentation in R/list.R
 \name{ds.hpc.list}
 \alias{ds.hpc.list}
-\title{List submitted dsHPC jobs}
+\title{Retired analyst job listing}
 \usage{
 ds.hpc.list(conns, label = NULL, mode = "mine+global")
 }
 \arguments{
-\item{conns}{DSI connections object.}
+\item{conns}{Ignored compatibility argument.}
 
-\item{label}{Character or NULL; optional server-side label filter.}
+\item{label}{Ignored compatibility argument.}
 
-\item{mode}{Character; "mine", "mine+global", or "global". Reserved for
-deployments that expose scoped list policies.}
+\item{mode}{Ignored compatibility argument.}
 }
 \value{
-A \code{dshpc_result} with one data.frame per site (columns \code{job_id},
-\code{state}, \code{name}, \code{label}, \code{submitted_at}, \code{progress}); printed as a
-formatted table.
+This function always raises an error before contacting a server.
 }
 \description{
-List submitted dsHPC jobs
-}
-\examples{
-\donttest{
-# conns <- DSI::datashield.login(...)  # live DataSHIELD session
-ds.hpc.list(conns)
-ds.hpc.list(conns, label = "dsImaging")
-}
+Job discovery across workflows is not an analyst operation. Keep the opaque
+symbol returned by the domain package and call its status method instead.
 }

@@ -2,27 +2,27 @@
 % Please edit documentation in R/outputs.R
 \name{ds.hpc.logs}
 \alias{ds.hpc.logs}
-\title{Tail sanitized dsHPC job logs}
+\title{Authorize a dsHPC job without disclosing runner logs}
 \usage{
 ds.hpc.logs(conns, job_id, last_n = 50L)
 }
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; job id or submission symbol (see
+\item{job_id}{Character; opaque bearer or domain workflow symbol (see
 \code{ds.hpc.job_id()}).}
 
 \item{last_n}{Integer number of log lines requested from each site.}
 }
 \value{
-A \code{dshpc_result} with per-site character vectors; printed as
-indented log lines.
+A \code{dshpc_result} with an empty character vector per authorized site.
+Raw runner output remains node/operator-only.
 }
 \description{
-Tail sanitized dsHPC job logs
+Authorize a dsHPC job without disclosing runner logs
 }
 \examples{
-\donttest{
+\dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 ds.hpc.logs(conns, "jobA", last_n = 20)
 }

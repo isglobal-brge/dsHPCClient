@@ -1,52 +1,38 @@
 # Module: dsHPC Studio
 
-#' Launch dsHPC Studio
+#' Retired analyst dsHPC Studio
 #'
-#' Opens a local Shiny dashboard for browsing dsHPC jobs on a pool of
-#' DataSHIELD connections. Studio queries only the selected server and refreshes
-#' on demand.
+#' Cross-workflow Studio requires scheduler and job enumeration data, so it is
+#' no longer available over analyst DataSHIELD connections.
 #'
-#' @param conns DSI connections object.
-#' @param host Character host passed to `shiny::runApp()`.
-#' @param port Optional port passed to `shiny::runApp()`.
-#' @param launch.browser Logical; passed to `shiny::runApp()`.
-#' @return The return value from `shiny::runApp()`.
+#' @param conns Ignored compatibility argument.
+#' @param host Ignored compatibility argument.
+#' @param port Ignored compatibility argument.
+#' @param launch.browser Ignored compatibility argument.
+#' @return This function always raises an error before contacting a server.
 #' @export
 ds.hpc.studio <- function(conns, host = "127.0.0.1", port = NULL,
                           launch.browser = interactive()) {
-  if (!requireNamespace("shiny", quietly = TRUE)) {
-    stop("Package 'shiny' is required to launch dsHPC Studio.",
-      call. = FALSE)
-  }
-  conns <- .studio_named_conns(conns)
-  app <- .studio_app(conns)
-  args <- list(appDir = app, host = host, launch.browser = launch.browser)
-  if (!is.null(port)) args$port <- port
-  do.call(shiny::runApp, args)
+  stop(
+    "Analyst Studio is retired; use domain workflow symbols or node-local ",
+    "administration.", call. = FALSE
+  )
 }
 
-#' Fetch dsHPC Studio data
+#' Retired analyst dsHPC Studio data
 #'
-#' @param conns DSI connections object.
-#' @param server Character server name. If NULL, all servers are queried.
-#' @param label Character or NULL; optional job label filter.
-#' @param mode Character; `"mine"`, `"mine+global"`, or `"global"`.
-#' @return A `dshpc_result` with one Studio snapshot per queried server.
+#' @param conns Ignored compatibility argument.
+#' @param server Ignored compatibility argument.
+#' @param label Ignored compatibility argument.
+#' @param mode Ignored compatibility argument.
+#' @return This function always raises an error before contacting a server.
 #' @export
 ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
                                mode = "mine+global") {
-  mode <- match.arg(mode, c("mine", "mine+global", "global"))
-  conns <- .studio_named_conns(conns)
-  servers <- server %||% names(conns)
-  bad <- setdiff(servers, names(conns))
-  if (length(bad) > 0)
-    stop("Unknown server: ", bad[1], call. = FALSE)
-
-  out <- lapply(servers, function(srv) {
-    .studio_fetch_one(conns, srv, label = label, mode = mode)
-  })
-  names(out) <- servers
-  dshpc_result(per_site = out, meta = list(scope = "studio"))
+  stop(
+    "Analyst Studio data is retired; use domain workflow symbols or ",
+    "node-local administration.", call. = FALSE
+  )
 }
 
 #' @keywords internal
@@ -69,7 +55,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
     backend <- .detect_backend(conns[[server]])
     scope <- .ds_encode(list(.owner = backend$username %||% "anonymous"))
     label <- .studio_null_if_empty(label)
-    res <- DSI::datashield.aggregate(conns[server],
+    res <- .ds_private_aggregate(conns[server],
       expr = call("hpcStudioDS", scope, label, mode))
     snapshot <- res[[server]] %||% res[[1]]
     .studio_normalize_snapshot(snapshot, server = server,
@@ -83,7 +69,7 @@ ds.hpc.studio_data <- function(conns, server = NULL, label = NULL,
 .studio_cancel_one <- function(conns, server, job_id, admin_key) {
   tryCatch({
     key_enc <- .ds_encode(list(.admin_key = admin_key))
-    res <- DSI::datashield.aggregate(conns[server],
+    res <- .ds_private_aggregate(conns[server],
       expr = call("hpcAdminCancelDS", job_id, key_enc))
     list(ok = TRUE, server = server, job_id = job_id,
       result = res[[server]] %||% res[[1]], error = NULL,
