@@ -3,8 +3,8 @@
 #' Fetch the disclosure-safe dsHPC job result
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character; opaque bearer or submission symbol (see
-#'   `ds.hpc.job_id()`).
+#' @param job_id Character; scalar workflow symbol/bearer, or the named
+#'   per-server bearer vector returned by `ds.hpc.job_id()`.
 #' @return A `dshpc_result` with one result object per site.
 #' @examples
 #' \dontrun{
@@ -14,11 +14,8 @@
 #' }
 #' @export
 ds.hpc.result <- function(conns, job_id) {
-  results <- list()
-  for (srv in names(conns)) {
-    r <- .ds_private_aggregate(conns[srv],
-      expr = call("hpcResultDS", job_id))
-    results[[srv]] <- r[[srv]]
-  }
+  results <- .ds_safe_aggregate(conns,
+    expr = function(srv) call("hpcResultDS",
+      .ds_job_reference_for_site(job_id, srv)))
   dshpc_result(per_site = results)
 }

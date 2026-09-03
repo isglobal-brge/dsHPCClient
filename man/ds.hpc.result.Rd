@@ -9,8 +9,8 @@ ds.hpc.result(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; opaque bearer or submission symbol (see
-\code{ds.hpc.job_id()}).}
+\item{job_id}{Character; scalar workflow symbol/bearer, or the named
+per-server bearer vector returned by \code{ds.hpc.job_id()}.}
 }
 \value{
 A \code{dshpc_result} with one result object per site.

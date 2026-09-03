@@ -1,14 +1,19 @@
 .capture_sensitive_output <- function(code) {
   messages <- character(0)
+  warnings <- character(0)
   value <- NULL
   stdout <- withCallingHandlers(
     utils::capture.output(value <- force(code), type = "output"),
     message = function(m) {
       messages <<- c(messages, conditionMessage(m))
       invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
     }
   )
-  list(value = value, text = c(stdout, messages))
+  list(value = value, text = c(stdout, messages, warnings))
 }
 
 test_that("sensitive aggregate calls suppress DSI expression progress", {
@@ -32,6 +37,8 @@ test_that("sensitive aggregate calls suppress DSI expression progress", {
         progress_enabled = getOption("progress_enabled")
       )
       rendered <- paste(deparse(expr), collapse = " ")
+      warning("DSI transport warning: ", rendered, call. = FALSE)
+      message("DSI transport message: ", rendered)
       if (isTRUE(getOption("progress_enabled", TRUE))) {
         cat("DSI initial progress\n")
       }
@@ -118,17 +125,24 @@ test_that("remote aggregate failures do not reflect sensitive details", {
   )
 
   direct_messages <- character(0)
-  direct_error <- withCallingHandlers(
-    tryCatch(ds.hpc.status(list(site = list()), bearer), error = identity),
+  direct_warnings <- character(0)
+  direct_result <- withCallingHandlers(
+    ds.hpc.status(list(site = list()), bearer),
     message = function(m) {
       direct_messages <<- c(direct_messages, conditionMessage(m))
       invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      direct_warnings <<- c(direct_warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
     }
   )
-  expect_s3_class(direct_error, "error")
-  expect_identical(conditionMessage(direct_error),
+  expect_s3_class(direct_result, "dshpc_result")
+  expect_identical(attr(direct_result$per_site, "ds_errors")$site,
     "Remote dsHPC request failed.")
-  expect_false(any(grepl(bearer, direct_messages, fixed = TRUE)))
+  expect_match(direct_warnings, "site", fixed = TRUE)
+  expect_false(any(grepl(bearer,
+    c(direct_messages, direct_warnings), fixed = TRUE)))
 
   safe_warnings <- character(0)
   safe_messages <- character(0)

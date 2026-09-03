@@ -1,3 +1,14 @@
+# dsHPCClient 0.3.4
+
+* Named per-site bearer vectors returned by `ds.hpc.job_id()` are now routed to
+  the matching node by status, result, output, log, wait, and admin-cancel
+  helpers; a bearer from one site is never sent to another.
+* Status and result requests retain successful node responses when another node
+  fails, and transport warnings, messages, and errors are replaced with generic
+  diagnostics so opaque bearers cannot enter client logs.
+* Remote admin cancellation documents its asynchronous `REQUESTED` state and
+  waits for server-side backend reconciliation before reporting completion.
+
 # dsHPCClient 0.3.3
 
 * Calls carrying job bearers or admin keys now suppress DataSHIELD expression

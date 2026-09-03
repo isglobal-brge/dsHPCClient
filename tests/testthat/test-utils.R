@@ -33,3 +33,18 @@ test_that(".ds_safe_aggregate warns per failed server and records ds_errors", {
   expect_false(is.null(errs))
   expect_true("siteX" %in% names(errs))
 })
+
+test_that("transport warnings are replaced with a generic warning", {
+  secret <- "B64:DO_NOT_REFLECT_THIS_WARNING"
+  testthat::local_mocked_bindings(
+    datashield.aggregate = function(conns, expr) {
+      warning("remote warning: ", secret, call. = FALSE)
+      list(site = TRUE)
+    },
+    .package = "DSI")
+
+  seen <- testthat::capture_warnings(
+    dsHPCClient:::.ds_private_aggregate(list(site = 1), quote(anyCallDS())))
+  expect_match(seen, "Remote dsHPC request produced a warning", fixed = TRUE)
+  expect_false(any(grepl(secret, seen, fixed = TRUE)))
+})

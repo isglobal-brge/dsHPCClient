@@ -3,8 +3,8 @@
 #' List outputs registered for a dsHPC job
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character; opaque bearer or domain workflow symbol (see
-#'   `ds.hpc.job_id()`).
+#' @param job_id Character; scalar workflow symbol/bearer, or the named
+#'   per-server bearer vector returned by `ds.hpc.job_id()`.
 #' @return A `dshpc_result` with one output metadata data.frame per site
 #'   (columns `name`, `kind`, `safe_for_client`, `size_bytes`); printed as
 #'   name/kind/size rows.
@@ -16,7 +16,8 @@
 #' @export
 ds.hpc.outputs <- function(conns, job_id) {
   results <- .ds_safe_aggregate(conns,
-    expr = call("hpcOutputsDS", job_id))
+    expr = function(srv) call("hpcOutputsDS",
+      .ds_job_reference_for_site(job_id, srv)))
   dshpc_result(per_site = results)
 }
 
@@ -48,8 +49,8 @@ ds.hpc.scheduler_status <- function(conns) {
 #' Authorize a dsHPC job without disclosing runner logs
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character; opaque bearer or domain workflow symbol (see
-#'   `ds.hpc.job_id()`).
+#' @param job_id Character; scalar workflow symbol/bearer, or the named
+#'   per-server bearer vector returned by `ds.hpc.job_id()`.
 #' @param last_n Integer number of log lines requested from each site.
 #' @return A `dshpc_result` with an empty character vector per authorized site.
 #'   Raw runner output remains node/operator-only.
@@ -61,6 +62,7 @@ ds.hpc.scheduler_status <- function(conns) {
 #' @export
 ds.hpc.logs <- function(conns, job_id, last_n = 50L) {
   results <- .ds_safe_aggregate(conns,
-    expr = call("hpcLogsDS", job_id, as.integer(last_n)))
+    expr = function(srv) call("hpcLogsDS",
+      .ds_job_reference_for_site(job_id, srv), as.integer(last_n)))
   dshpc_result(per_site = results)
 }

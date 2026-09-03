@@ -1,7 +1,7 @@
 Package: dsHPCClient
 Type: Package
 Title: Observability and Administration for dsHPC
-Version: 0.3.3
+Version: 0.3.4
 Authors@R: c(
     person("David", "Sarrat González", role = c("aut", "cre"), email = "david.sarrat@isglobal.org"),
     person("Juan R", "González", role = "aut", email = "juanr.gonzalez@isglobal.org"))

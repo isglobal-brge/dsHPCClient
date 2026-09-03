@@ -9,10 +9,14 @@ ds.hpc.admin.cancel(conns, job_id, admin_key)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; job ID to cancel.}
+\item{job_id}{Character; scalar job ID/bearer, or a named per-server vector.}
 
 \item{admin_key}{Character; the admin key matching \code{dshpc.admin_key} or
 \code{DSHPC_ADMIN_KEY} on the server.}
+}
+\value{
+A \code{dshpc_result}. Remote jobs may report \code{cancellation = "REQUESTED"}
+and remain \code{RUNNING} until backend reconciliation completes.
 }
 \description{
 Cancel any job (admin only)

@@ -27,6 +27,6 @@ this transferable credential. References can be reused with \code{ds.hpc.wait()}
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 # job <- dsImagingClient::ds.imaging.qc.metrics(conns, symbol = "jobA")
 ids <- ds.hpc.job_id(conns, "jobA")
-ds.hpc.wait(conns, ids[[1]])
+ds.hpc.wait(conns, ids)
 }
 }

@@ -29,12 +29,46 @@
   )
   on.exit(options(old_options), add = TRUE)
 
-  tryCatch(
-    DSI::datashield.aggregate(conns, expr = expr),
-    error = function(e) {
-      stop("Remote dsHPC request failed.", call. = FALSE)
-    }
+  had_warning <- FALSE
+  result <- withCallingHandlers(
+    tryCatch(
+      DSI::datashield.aggregate(conns, expr = expr),
+      error = function(e) {
+        stop("Remote dsHPC request failed.", call. = FALSE)
+      }
+    ),
+    warning = function(w) {
+      had_warning <<- TRUE
+      invokeRestart("muffleWarning")
+    },
+    message = function(m) invokeRestart("muffleMessage")
   )
+  if (isTRUE(had_warning)) {
+    warning("Remote dsHPC request produced a warning.", call. = FALSE)
+  }
+  result
+}
+
+#' Select a scalar symbol/bearer or a bearer named for one server
+#' @keywords internal
+.ds_job_reference_for_site <- function(job_id, server) {
+  job_names <- names(job_id)
+  is_named <- !is.null(job_names) && any(!is.na(job_names) & nzchar(job_names))
+  if (is_named) {
+    if (!server %in% job_names) {
+      stop("No dsHPC job reference is available for this server.", call. = FALSE)
+    }
+    value <- job_id[[server]]
+  } else {
+    if (length(job_id) != 1L) {
+      stop("Per-server dsHPC job references must be named.", call. = FALSE)
+    }
+    value <- job_id[[1L]]
+  }
+  if (length(value) != 1L || is.na(value) || !nzchar(as.character(value))) {
+    stop("No dsHPC job reference is available for this server.", call. = FALSE)
+  }
+  value
 }
 
 #' @keywords internal
@@ -44,7 +78,8 @@
   errors <- list()
   for (srv in server_names) {
     tryCatch({
-      res <- .ds_private_aggregate(conns[srv], expr = expr)
+      server_expr <- if (is.function(expr)) expr(srv) else expr
+      res <- .ds_private_aggregate(conns[srv], expr = server_expr)
       results[[srv]] <- res[[srv]]
     }, error = function(e) {
       errors[[srv]] <<- "Remote dsHPC request failed."

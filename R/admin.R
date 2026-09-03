@@ -21,13 +21,16 @@ ds.hpc.admin.list <- function(conns, admin_key, label = NULL) {
 #' Cancel any job (admin only)
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character; job ID to cancel.
+#' @param job_id Character; scalar job ID/bearer, or a named per-server vector.
 #' @param admin_key Character; the admin key matching `dshpc.admin_key` or
 #'   `DSHPC_ADMIN_KEY` on the server.
+#' @return A `dshpc_result`. Remote jobs may report `cancellation = "REQUESTED"`
+#'   and remain `RUNNING` until backend reconciliation completes.
 #' @export
 ds.hpc.admin.cancel <- function(conns, job_id, admin_key) {
   key_enc <- .ds_encode(list(.admin_key = admin_key))
   results <- .ds_safe_aggregate(conns,
-    expr = call("hpcAdminCancelDS", job_id, key_enc))
+    expr = function(srv) call("hpcAdminCancelDS",
+      .ds_job_reference_for_site(job_id, srv), key_enc))
   dshpc_result(per_site = results)
 }

@@ -17,13 +17,14 @@
 #' # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 #' # job <- dsImagingClient::ds.imaging.qc.metrics(conns, symbol = "jobA")
 #' ids <- ds.hpc.job_id(conns, "jobA")
-#' ds.hpc.wait(conns, ids[[1]])
+#' ds.hpc.wait(conns, ids)
 #' }
 #' @export
 ds.hpc.job_id <- function(conns, symbol) {
   refs <- lapply(names(conns), function(srv) {
-    result <- .ds_private_aggregate(conns[srv],
-      expr = call("hpcJobReferenceDS", symbol))
+    result <- tryCatch(.ds_private_aggregate(conns[srv],
+      expr = call("hpcJobReferenceDS", symbol)), error = function(e) NULL)
+    if (is.null(result)) return(NA_character_)
     value <- result[[srv]]
     if (is.character(value) && length(value) == 1L && !is.na(value)) {
       value

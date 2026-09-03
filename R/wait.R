@@ -3,8 +3,8 @@
 #' Wait for a dsHPC job to reach a terminal state
 #'
 #' @param conns DSI connections object.
-#' @param job_id Character; opaque bearer or domain workflow symbol (see
-#'   `ds.hpc.job_id()`).
+#' @param job_id Character; scalar workflow symbol/bearer, or the named
+#'   per-server bearer vector returned by `ds.hpc.job_id()`.
 #' @param timeout Numeric timeout in seconds.
 #' @param poll_interval Numeric polling interval in seconds.
 #' @return A `dshpc_result` status object from `ds.hpc.status()`.
@@ -12,7 +12,7 @@
 #' \dontrun{
 #' # conns <- DSI::datashield.login(...)  # live DataSHIELD session
 #' ids <- ds.hpc.job_id(conns, "jobA")
-#' st <- ds.hpc.wait(conns, ids[[1]], timeout = 600, poll_interval = 5)
+#' st <- ds.hpc.wait(conns, ids, timeout = 600, poll_interval = 5)
 #' print(st)
 #' }
 #' @export
@@ -29,8 +29,9 @@ ds.hpc.wait <- function(conns, job_id, timeout = 3600, poll_interval = 5) {
   while (Sys.time() < deadline) {
     for (srv in srv_names[!done]) {
       st <- tryCatch({
+        reference <- .ds_job_reference_for_site(job_id, srv)
         r <- .ds_private_aggregate(conns[srv],
-          expr = call("hpcStatusDS", job_id))
+          expr = call("hpcStatusDS", reference))
         r[[srv]]
       }, error = function(e) NULL)
 

@@ -9,8 +9,8 @@ ds.hpc.logs(conns, job_id, last_n = 50L)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; opaque bearer or domain workflow symbol (see
-\code{ds.hpc.job_id()}).}
+\item{job_id}{Character; scalar workflow symbol/bearer, or the named
+per-server bearer vector returned by \code{ds.hpc.job_id()}.}
 
 \item{last_n}{Integer number of log lines requested from each site.}
 }
