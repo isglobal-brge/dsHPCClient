@@ -1,3 +1,13 @@
+# dsHPCClient 0.3.5
+
+* Added `ds.hpc.unit.init()` and `ds.hpc.unit.destroy()` for selecting a
+  server-managed execution unit through backend-neutral DSI Resource calls.
+  Scalar connections and exact per-site Opal/Armadillo Resource names are
+  supported without exposing credentials or remote transport errors.
+* Unit initialization removes its temporary Resource and Armadillo's transient
+  `R`/`rds` loader symbols on success and rollback, and verifies cleanup before
+  returning.
+
 # dsHPCClient 0.3.4
 
 * Named per-site bearer vectors returned by `ds.hpc.job_id()` are now routed to

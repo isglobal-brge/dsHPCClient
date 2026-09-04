@@ -22,6 +22,26 @@ Submission, pipeline composition and output loading are mediated by domain
 packages. For imaging workflows, use the `ds.imaging.*` functions from
 dsImagingClient rather than constructing dsHPC jobs directly.
 
+To select an administrator-managed unit for later domain submissions, pass one
+opaque Resource name per site. This uses DSI generics and supports mixed Opal
+and Armadillo connections:
+
+```r
+ds.hpc.unit.init(conns, resource = c(
+  opal_site = "PROJECT.cluster_a",
+  armadillo_site = "hpcunits/resources/unit_alpha"
+))
+
+# dsImaging calls in this DataSHIELD session now use those selected units.
+
+ds.hpc.unit.destroy(conns)
+```
+
+A scalar `DSConnection` is accepted too. If `resource` is omitted, the client
+option `dshpc.unit.resource` is used; this option contains only a Resource name,
+never a credential. Without an active selection, new jobs use the server's
+pinned site default.
+
 ## Domain-mediated submission pattern
 
 Submission happens through a domain package. If that package exposes the raw
