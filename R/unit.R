@@ -43,12 +43,24 @@ ds.hpc.unit.init <- function(
   initialized <- FALSE
   init_attempted <- FALSE
   on.exit({
+    rollback_failures <- character(0)
     if (init_attempted && !initialized) {
-      tryCatch(.hpc_unit_destroy_exact(conns, symbol), error = function(e) NULL)
+      report <- tryCatch(.hpc_unit_destroy_exact(conns, symbol),
+        error = function(e) list(failures = paste0(hosts, ":rollback")))
+      rollback_failures <- c(rollback_failures, report$failures)
     }
     for (temporary in c(provider_transients, resource_symbol)) {
-      tryCatch(.hpc_unit_remove_exact(conns, temporary),
-        error = function(e) NULL)
+      report <- tryCatch(.hpc_unit_remove_exact(conns, temporary),
+        error = function(e) list(failures = paste0(hosts, ":rollback")))
+      rollback_failures <- c(rollback_failures, report$failures)
+    }
+    if (!initialized && length(rollback_failures)) {
+      nodes <- unique(sub(":(symbol-state|remove|destroy|rollback)$", "",
+        rollback_failures))
+      stop("HPC unit initialization failed and rollback was incomplete on: ",
+        paste(nodes, collapse = ", "),
+        ". Retry ds.hpc.unit.destroy() with the same symbol; if cleanup ",
+        "still fails, end the affected DataSHIELD sessions.", call. = FALSE)
     }
   }, add = TRUE)
 
@@ -277,7 +289,7 @@ ds.hpc.unit.destroy <- function(conns, symbol = "hpc_unit") {
     }
     if (!symbol %in% before$symbols) next
     error <- tryCatch({
-      DSI::datashield.rm(conns[host], symbol)
+      .hpc_unit_transport(DSI::datashield.rm(conns[host], symbol))
       NULL
     }, error = identity)
     after <- .hpc_unit_node_symbols(conns, host)

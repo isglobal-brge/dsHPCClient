@@ -158,6 +158,87 @@ test_that("partial unit initialization rolls back without reflecting names", {
   expect_true(all(lengths(symbols) == 0L))
 })
 
+test_that("failed initialization reports incomplete rollback safely", {
+  conns <- .unit_fake_connections()
+  symbols <- list(opal_site = character(0), armadillo_site = character(0))
+  private_name <- "PRIVATE_PROJECT.private-unit"
+  remote_detail <- "remote failure at /srv/private/ssh/id_ed25519"
+
+  testthat::local_mocked_bindings(
+    datashield.aggregate = .unit_fake_capabilities,
+    dsHasResource = function(conn, resource) TRUE,
+    datashield.symbols = function(conns) {
+      lapply(names(conns), function(site) symbols[[site]]) |>
+        stats::setNames(names(conns))
+    },
+    datashield.assign.resource = function(conns, symbol, resource,
+                                           success = NULL, error = NULL, ...) {
+      for (site in names(conns)) {
+        symbols[[site]] <<- union(symbols[[site]], symbol)
+        if (identical(site, "armadillo_site")) {
+          symbols[[site]] <<- union(symbols[[site]], c("R", "rds"))
+        }
+        success(site)
+      }
+      invisible(NULL)
+    },
+    datashield.assign.expr = function(conns, symbol, expr,
+                                      success = NULL, error = NULL, ...) {
+      method <- as.character(expr[[1L]])
+      for (site in names(conns)) {
+        if (identical(method, "hpcUnitInitDS") &&
+            identical(site, "armadillo_site")) {
+          error(site, paste(remote_detail, private_name))
+        } else {
+          symbols[[site]] <<- union(symbols[[site]], symbol)
+          success(site)
+        }
+      }
+      invisible(NULL)
+    },
+    datashield.rm = function(conns, symbol) {
+      site <- names(conns)[[1L]]
+      message(remote_detail)
+      warning(remote_detail, call. = FALSE)
+      if (identical(site, "armadillo_site")) {
+        stop(paste(remote_detail, private_name), call. = FALSE)
+      }
+      # Model a provider that ACKs removal without actually removing it.
+      invisible(NULL)
+    },
+    .package = "DSI")
+
+  warnings <- character(0)
+  messages <- character(0)
+  failure <- withCallingHandlers(
+    tryCatch({
+      ds.hpc.unit.init(conns, resource = private_name, symbol = "hpc_unit")
+      NULL
+    }, error = identity),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    },
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    })
+
+  expect_s3_class(failure, "error")
+  text <- c(conditionMessage(failure), warnings, messages)
+  expect_match(conditionMessage(failure), "opal_site", fixed = TRUE)
+  expect_match(conditionMessage(failure), "armadillo_site", fixed = TRUE)
+  expect_match(conditionMessage(failure),
+    "Retry ds.hpc.unit.destroy() with the same symbol", fixed = TRUE)
+  expect_match(conditionMessage(failure),
+    "end the affected DataSHIELD sessions", fixed = TRUE)
+  expect_false(any(grepl(private_name, text, fixed = TRUE)))
+  expect_false(any(grepl(remote_detail, text, fixed = TRUE)))
+  expect_length(warnings, 0L)
+  expect_length(messages, 0L)
+  expect_true(all(lengths(symbols) > 0L))
+})
+
 test_that("unit initialization verifies availability before assignment", {
   conns <- .unit_fake_connections()
   assignment_called <- FALSE

@@ -7,6 +7,9 @@
 * Unit initialization removes its temporary Resource and Armadillo's transient
   `R`/`rds` loader symbols on success and rollback, and verifies cleanup before
   returning.
+* Incomplete multi-site rollback is now reported with only the affected node
+  names and safe recovery guidance; provider messages, paths, and Resource
+  names remain suppressed.
 
 # dsHPCClient 0.3.4
 

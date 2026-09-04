@@ -40,7 +40,10 @@ ds.hpc.unit.destroy(conns)
 A scalar `DSConnection` is accepted too. If `resource` is omitted, the client
 option `dshpc.unit.resource` is used; this option contains only a Resource name,
 never a credential. Without an active selection, new jobs use the server's
-pinned site default.
+pinned site default. Initialization is all-or-nothing across sites. If a
+provider cannot remove a partial assignment, the error names only the affected
+nodes; retry destruction and, if cleanup still fails, end those DataSHIELD
+sessions before reconnecting.
 
 ## Domain-mediated submission pattern
 
