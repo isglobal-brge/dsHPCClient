@@ -38,3 +38,42 @@ test_that("ds.hpc.wait polls each server with its named bearer", {
   expect_true(all(observed$site1 == refs[["site1"]]))
   expect_true(all(observed$site2 == refs[["site2"]]))
 })
+
+test_that("ds.hpc.wait uses coarse shared tracking status", {
+  id <- "trk_11111111-1111-4111-8111-111111111111"
+  methods <- character(0)
+  local_mocked_bindings(
+    datashield.aggregate = function(conns, expr) {
+      methods <<- c(methods, as.character(expr[[1L]]))
+      value <- list(tracking_id = id, state = "terminal",
+        is_done = TRUE, kind = "analysis")
+      stats::setNames(list(value), names(conns))
+    },
+    .package = "DSI"
+  )
+
+  result <- testthat::capture_messages(
+    value <- ds.hpc.wait(list(site = 1), id, timeout = 1, poll_interval = 0))
+  expect_s3_class(value, "dshpc_result")
+  expect_true(all(methods == "hpcTrackingStatusDS"))
+  expect_false(any(grepl(id, result, fixed = TRUE)))
+})
+
+test_that("ds.hpc.wait ignores status for a different tracking root", {
+  id <- "trk_11111111-1111-4111-8111-111111111111"
+  other <- "trk_22222222-2222-4222-8222-222222222222"
+  calls <- 0L
+  local_mocked_bindings(
+    datashield.aggregate = function(conns, expr) {
+      calls <<- calls + 1L
+      value <- list(tracking_id = if (calls == 1L) other else id,
+        state = "terminal", is_done = TRUE, kind = "analysis")
+      stats::setNames(list(value), names(conns))
+    },
+    .package = "DSI"
+  )
+
+  testthat::capture_messages(ds.hpc.wait(list(site = 1), id,
+    timeout = 1, poll_interval = 0))
+  expect_identical(calls, 3L)
+})

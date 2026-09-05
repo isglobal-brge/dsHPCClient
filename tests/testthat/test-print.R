@@ -69,10 +69,16 @@ test_that("print never renders a bearer-shaped job reference", {
   expect_match(scalar_output, "opaque job reference", fixed = TRUE)
 })
 
-test_that("retired summary has no legacy job-id renderer", {
-  expect_error(ds.hpc.summary(NULL), "retired", fixed = TRUE)
-  body_text <- paste(deparse(body(ds.hpc.summary)), collapse = "\n")
-  expect_false(grepl("job_id", body_text, fixed = TRUE))
+test_that("print renders shared roots without treating ids as capabilities", {
+  id <- "trk_11111111-1111-4111-8111-111111111111"
+  roots <- data.frame(tracking_id = id, state = "terminal",
+    is_done = TRUE, kind = "analysis", stringsAsFactors = FALSE)
+  result <- dsHPCClient:::dshpc_result(per_site = list(site1 = roots))
+  output <- paste(capture.output(print(result)), collapse = "\n")
+
+  expect_match(output, "shared analysis root", fixed = TRUE)
+  expect_match(output, id, fixed = TRUE)
+  expect_false(grepl("opaque job reference", output, fixed = TRUE))
 })
 
 test_that("print renders outputs as name/kind/size rows", {

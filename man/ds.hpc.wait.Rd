@@ -9,8 +9,8 @@ ds.hpc.wait(conns, job_id, timeout = 3600, poll_interval = 5)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; scalar workflow symbol/bearer, or the named
-per-server bearer vector returned by \code{ds.hpc.job_id()}.}
+\item{job_id}{Character; public tracking id, private workflow symbol/bearer,
+or a named per-server vector.}
 
 \item{timeout}{Numeric timeout in seconds.}
 

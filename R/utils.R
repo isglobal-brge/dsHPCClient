@@ -49,12 +49,16 @@
   result
 }
 
-#' Select a scalar symbol/bearer or a bearer named for one server
-#' @keywords internal
+#' @noRd
 .ds_job_reference_for_site <- function(job_id, server) {
   job_names <- names(job_id)
   is_named <- !is.null(job_names) && any(!is.na(job_names) & nzchar(job_names))
   if (is_named) {
+    if (anyNA(job_names) || any(!nzchar(job_names)) ||
+        anyDuplicated(job_names)) {
+      stop("Per-server dsHPC job references must be uniquely named.",
+        call. = FALSE)
+    }
     if (!server %in% job_names) {
       stop("No dsHPC job reference is available for this server.", call. = FALSE)
     }
@@ -80,6 +84,10 @@
     tryCatch({
       server_expr <- if (is.function(expr)) expr(srv) else expr
       res <- .ds_private_aggregate(conns[srv], expr = server_expr)
+      if (!is.list(res) || is.null(names(res)) ||
+          sum(names(res) == srv) != 1L || is.null(res[[srv]])) {
+        stop("Remote dsHPC request failed.", call. = FALSE)
+      }
       results[[srv]] <- res[[srv]]
     }, error = function(e) {
       errors[[srv]] <<- "Remote dsHPC request failed."
@@ -92,6 +100,49 @@
   }
   if (length(errors) > 0) attr(results, "ds_errors") <- errors
   results
+}
+
+#' @noRd
+.ds_private_assign <- function(conns, symbol, expr, operation = "Assignment") {
+  servers <- names(conns)
+  if (is.null(servers) || anyNA(servers) || any(!nzchar(servers)) ||
+      anyDuplicated(servers)) {
+    stop("DataSHIELD connections require non-empty, unique node names.",
+      call. = FALSE)
+  }
+  succeeded <- stats::setNames(rep(FALSE, length(servers)), servers)
+  failed <- stats::setNames(rep(FALSE, length(servers)), servers)
+  invalid_callback <- FALSE
+  success <- function(node, ...) {
+    if (length(node) != 1L || is.na(node) || !node %in% servers) {
+      invalid_callback <<- TRUE
+    } else succeeded[[node]] <<- TRUE
+  }
+  error <- function(node, ...) {
+    if (length(node) != 1L || is.na(node) || !node %in% servers) {
+      invalid_callback <<- TRUE
+    } else failed[[node]] <<- TRUE
+  }
+
+  old_options <- options(datashield.progress = FALSE,
+    datashield.errors.print = FALSE, progress_enabled = FALSE)
+  on.exit(options(old_options), add = TRUE)
+  thrown <- tryCatch({
+    withCallingHandlers(
+      DSI::datashield.assign.expr(conns, symbol = symbol, expr = expr,
+        success = success, error = error, errors.print = FALSE),
+      warning = function(w) invokeRestart("muffleWarning"),
+      message = function(m) invokeRestart("muffleMessage"))
+    NULL
+  }, error = identity)
+
+  bad <- servers[!succeeded | failed]
+  if (!is.null(thrown) || isTRUE(invalid_callback) || length(bad)) {
+    if (!length(bad)) bad <- servers
+    stop(operation, " failed or returned no ACK on: ",
+      paste(bad, collapse = ", "), ".", call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 #' @keywords internal

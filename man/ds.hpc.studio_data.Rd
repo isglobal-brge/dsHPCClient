@@ -2,22 +2,24 @@
 % Please edit documentation in R/studio.R
 \name{ds.hpc.studio_data}
 \alias{ds.hpc.studio_data}
-\title{Retired analyst dsHPC Studio data}
+\title{Fetch disclosure-safe Studio data}
 \usage{
-ds.hpc.studio_data(conns, server = NULL, label = NULL, mode = "mine+global")
+ds.hpc.studio_data(conns, server = NULL, limit = 100L, cursor = NULL)
 }
 \arguments{
-\item{conns}{Ignored compatibility argument.}
+\item{conns}{DSI connections object.}
 
-\item{server}{Ignored compatibility argument.}
+\item{server}{Optional server name; all servers are queried by default.}
 
-\item{label}{Ignored compatibility argument.}
+\item{limit}{Integer page size from 1 to 500.}
 
-\item{mode}{Ignored compatibility argument.}
+\item{cursor}{Optional scalar or named per-site cursor.}
 }
 \value{
-This function always raises an error before contacting a server.
+A \code{dshpc_result} with one safe Studio snapshot per site.
 }
 \description{
-Retired analyst dsHPC Studio data
+Fetches one page of shared tracking roots from each selected server. Use the
+returned \code{next_cursor} with another call, or launch \code{\link[=ds.hpc.studio]{ds.hpc.studio()}} and use
+its \strong{Load more} action. A tracking id can always be looked up directly.
 }

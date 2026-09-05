@@ -1,20 +1,20 @@
 Package: dsHPCClient
 Type: Package
 Title: Observability and Administration for dsHPC
-Version: 0.3.5
+Version: 0.4.0
 Authors@R: c(
     person("David", "Sarrat González", role = c("aut", "cre"), email = "david.sarrat@isglobal.org"),
     person("Juan R", "González", role = "aut", email = "juanr.gonzalez@isglobal.org"))
 Author: David Sarrat González [aut, cre],
     Juan R González [aut]
 Maintainer: David Sarrat González <david.sarrat@isglobal.org>
-Description: Client-side R package providing capability-scoped status and safe
-    results for dsHPC durable jobs plus admin-key-gated operations. Submission,
-    output loading and pipeline composition are
-    server-side concerns; domain packages such as dsImagingClient expose their
-    own analyst-facing workflows that invoke domain DataSHIELD methods, which
-    in turn use dsHPC server-side via its package-to-package API. Analyst job
-    enumeration, scheduler topology, and Studio are retired.
+Description: Client-side R package for disclosure-safe shared tracking,
+    results and server-side output reuse for durable dsHPC analyses, with
+    capability-scoped compatibility and admin-key-gated operations. Domain
+    packages such as dsImagingClient submit validated workflows through the
+    dsHPC server API. Analyst Studio displays logical tracking roots only;
+    patient-level artifacts, execution jobs, logs and scheduler topology stay
+    on the server.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:

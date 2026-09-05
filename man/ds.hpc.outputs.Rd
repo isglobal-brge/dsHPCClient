@@ -9,13 +9,13 @@ ds.hpc.outputs(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; scalar workflow symbol/bearer, or the named
-per-server bearer vector returned by \code{ds.hpc.job_id()}.}
+\item{job_id}{Character; a public \code{trk_...} tracking id, a private workflow
+symbol/bearer, or a named per-server vector. The shared path lists only
+outputs classified \code{client_safe} or \code{server_reusable}.}
 }
 \value{
 A \code{dshpc_result} with one output metadata data.frame per site
-(columns \code{name}, \code{kind}, \code{safe_for_client}, \code{size_bytes}); printed as
-name/kind/size rows.
+(shared columns are \code{name}, \code{kind}, and \code{classification}).
 }
 \description{
 List outputs registered for a dsHPC job

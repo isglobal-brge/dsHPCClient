@@ -31,7 +31,21 @@ print.dshpc_result <- function(x, ...) {
 #' fallback.
 #' @keywords internal
 .print_site_payload <- function(srv, site) {
-  # Jobs listing (hpcListDS / hpcAdminListDS payloads)
+  # Shared root tracking payloads. These identifiers are public tracking
+  # handles, never job capabilities.
+  if (is.data.frame(site) &&
+      all(c("tracking_id", "state") %in% names(site))) {
+    if (nrow(site) == 0) {
+      cat("  ", srv, ": (no shared analyses)\n", sep = "")
+    } else {
+      cat("  ", srv, ": ", nrow(site), " shared analysis root(s)\n",
+        sep = "")
+      .print_indented_df(site)
+    }
+    return(invisible(NULL))
+  }
+
+  # Raw administrator listing payloads.
   if (is.data.frame(site) && all(c("job_id", "state") %in% names(site))) {
     if (nrow(site) == 0) {
       cat("  ", srv, ": (no jobs)\n", sep = "")
@@ -46,7 +60,20 @@ print.dshpc_result <- function(x, ...) {
     return(invisible(NULL))
   }
 
-  # Outputs listing (hpcOutputsDS payload)
+  # Shared outputs listing.
+  if (is.data.frame(site) &&
+      all(c("name", "kind", "classification") %in% names(site))) {
+    if (nrow(site) == 0) {
+      cat("  ", srv, ": (no reusable outputs)\n", sep = "")
+    } else {
+      cat("  ", srv, ": ", nrow(site), " reusable output(s)\n", sep = "")
+      .print_indented_df(site[, c("name", "kind", "classification"),
+        drop = FALSE])
+    }
+    return(invisible(NULL))
+  }
+
+  # Capability-scoped outputs listing (hpcOutputsDS payload)
   if (is.data.frame(site) && all(c("name", "kind") %in% names(site))) {
     if (nrow(site) == 0) {
       cat("  ", srv, ": (no outputs)\n", sep = "")
@@ -57,6 +84,12 @@ print.dshpc_result <- function(x, ...) {
                     .fmt_bytes(site$size_bytes[i] %||% NA)))
       }
     }
+    return(invisible(NULL))
+  }
+
+  if (is.data.frame(site)) {
+    cat("  ", srv, ": ", nrow(site), " row(s)\n", sep = "")
+    .print_indented_df(site)
     return(invisible(NULL))
   }
 

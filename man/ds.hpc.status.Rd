@@ -9,8 +9,10 @@ ds.hpc.status(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; scalar workflow symbol/bearer, or the named
-per-server bearer vector returned by \code{ds.hpc.job_id()}.}
+\item{job_id}{Character; a public \code{trk_...} tracking id, a private workflow
+symbol/bearer, or a named per-server vector of either form. Tracking ids
+use the shared root API; existing private references remain capability
+scoped.}
 }
 \value{
 A \code{dshpc_result} with one status list per site.
@@ -21,9 +23,9 @@ Get dsHPC job status
 \examples{
 \dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
-# job <- dsImagingClient::ds.imaging.qc.metrics(conns, symbol = "jobA")
-ds.hpc.status(conns, "jobA")                 # by symbol
-ids <- ds.hpc.job_id(conns, "jobA")
-ds.hpc.status(conns, ids)                    # by per-site opaque bearers
+roots <- ds.hpc.list(conns)
+id <- roots$per_site$site1$tracking_id[[1]]
+ds.hpc.status(conns["site1"], id)       # shared root, no token
+ds.hpc.status(conns, private_bearers)    # private compatibility path
 }
 }

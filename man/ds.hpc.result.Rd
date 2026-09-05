@@ -9,8 +9,9 @@ ds.hpc.result(conns, job_id)
 \arguments{
 \item{conns}{DSI connections object.}
 
-\item{job_id}{Character; scalar workflow symbol/bearer, or the named
-per-server bearer vector returned by \code{ds.hpc.job_id()}.}
+\item{job_id}{Character; a public \code{trk_...} tracking id, a private workflow
+symbol/bearer, or a named per-server vector. Shared results require no
+token but contain only server-approved disclosure-safe values.}
 }
 \value{
 A \code{dshpc_result} with one result object per site.
@@ -21,7 +22,7 @@ Fetch the disclosure-safe dsHPC job result
 \examples{
 \dontrun{
 # conns <- DSI::datashield.login(...)  # live DataSHIELD session
-res <- ds.hpc.result(conns, "jobA")
+res <- ds.hpc.result(conns["site1"], "trk_...")
 str(res$per_site)
 }
 }

@@ -2,18 +2,21 @@
 % Please edit documentation in R/summary.R
 \name{ds.hpc.summary}
 \alias{ds.hpc.summary}
-\title{Retired cross-workflow job summary}
+\title{Summarize shared dsHPC tracking roots}
 \usage{
-ds.hpc.summary(conns, label = NULL)
+ds.hpc.summary(conns, max_items = Inf)
 }
 \arguments{
-\item{conns}{Ignored compatibility argument.}
+\item{conns}{DSI connections object.}
 
-\item{label}{Ignored compatibility argument.}
+\item{max_items}{Optional positive whole-number ceiling per site. The
+default retrieves the complete tracking history.}
 }
 \value{
-This function always raises the retired-listing error.
+A \code{dshpc_result} with \code{state} and \code{roots} columns per site.
 }
 \description{
-Retired cross-workflow job summary
+Counts logical analyses, never execution children or cohort records. The
+summary is derived locally from the same fixed root-level schema returned by
+\code{\link[=ds.hpc.list]{ds.hpc.list()}}.
 }

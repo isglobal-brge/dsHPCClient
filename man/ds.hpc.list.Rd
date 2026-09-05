@@ -2,21 +2,40 @@
 % Please edit documentation in R/list.R
 \name{ds.hpc.list}
 \alias{ds.hpc.list}
-\title{Retired analyst job listing}
+\title{List shared dsHPC jobs}
 \usage{
-ds.hpc.list(conns, label = NULL, mode = "mine+global")
+ds.hpc.list(conns, limit = 100L, cursor = NULL, all = TRUE, max_items = Inf)
 }
 \arguments{
-\item{conns}{Ignored compatibility argument.}
+\item{conns}{DSI connections object.}
 
-\item{label}{Ignored compatibility argument.}
+\item{limit}{Integer page size requested per site, between 1 and 500. This
+never limits the historical result when \code{all = TRUE}.}
 
-\item{mode}{Ignored compatibility argument.}
+\item{cursor}{Optional scalar cursor, or named per-site cursor vector, from
+the preceding page. Cursors contain no job metadata.}
+
+\item{all}{Logical; follow every page by default. Set to \code{FALSE} for one
+page and read its \code{next_cursor} and \code{has_more} attributes.}
+
+\item{max_items}{Optional positive whole-number ceiling per site when
+following pages. The default \code{Inf} retrieves the complete history.}
 }
 \value{
-This function always raises an error before contacting a server.
+A \code{dshpc_result} containing one root-level data frame per site with
+exactly \code{tracking_id}, \code{state}, \code{is_done}, and \code{kind}. A single-page or
+explicitly truncated result carries \code{next_cursor} and \code{has_more}
+attributes for continuation.
 }
 \description{
-Job discovery across workflows is not an analyst operation. Keep the opaque
-symbol returned by the domain package and call its status method instead.
+Lists one disclosure-safe tracking root per logical analysis. Execution
+children, retries, labels, cohort sizes, timestamps, topology, logs and
+cache information are never requested. A tracking id identifies shared
+knowledge on the node; it does not identify an execution artifact.
+}
+\examples{
+\dontrun{
+jobs <- ds.hpc.list(conns)
+jobs$per_site$site1
+}
 }

@@ -1,3 +1,27 @@
+# dsHPCClient 0.4.0
+
+* Restored `ds.hpc.list()`, `ds.hpc.summary()` and dsHPC Studio on the new
+  versioned shared-root tracking API. Listing follows the full paginated
+  history by default and Studio supports progressive paging and direct lookup
+  by public `trk_...` id.
+* `ds.hpc.status()`, `ds.hpc.result()`, `ds.hpc.outputs()` and
+  `ds.hpc.wait()` now route public tracking ids to the disclosure-safe shared
+  API while preserving the existing capability path for private symbols and
+  bearers.
+* Added `ds.hpc.load_output()` to assign an opaque reusable-output reference
+  in the server R session. Artifact values, paths and underlying execution
+  jobs never cross to the client.
+* Studio now negotiates `root_v1`, `safe_v1` and `opaque_ref_v1` capabilities
+  and degrades cleanly when shared tracking is unavailable. A selected reusable
+  output can be assigned to an analyst-chosen server symbol without downloading
+  it. Studio no longer contains scheduler, DAG, log, cancellation, timestamp,
+  progress, retry, label or child-job panels.
+* Client-side response normalization retains only the fixed public schemas:
+  at most one `output_001` server object and one `output_002` count-only
+  summary. It rejects raw domain names, arbitrary kinds, malformed values,
+  oversized or missing pages, cursors, tracking status, and remote attributes
+  with generic diagnostics.
+
 # dsHPCClient 0.3.5
 
 * Added `ds.hpc.unit.init()` and `ds.hpc.unit.destroy()` for selecting a
